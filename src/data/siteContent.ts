@@ -58,7 +58,7 @@ export const SITE_DATA = {
     toggle: {
       label: "I'm a Developer",
       type: "switch",
-      default: true
+      default: false
     },
     // Developer toggle = true content
     developer: {

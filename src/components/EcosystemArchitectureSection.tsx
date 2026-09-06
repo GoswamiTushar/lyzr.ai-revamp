@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, useRef } from 'react';
-import { motion, AnimatePresence } from 'motion/react';
+import { motion, AnimatePresence, useScroll, useTransform } from 'motion/react';
 import { Plus, X, Layers, Cpu, Compass, Box } from 'lucide-react';
 
 interface EcosystemLayer {
@@ -141,6 +141,13 @@ export const EcosystemArchitectureSection: React.FC<EcosystemArchitectureSection
   const progressBarRef = useRef<HTMLDivElement>(null);
   const mobileProgressBarRef = useRef<HTMLDivElement>(null);
 
+  // Scroll-driven Parallax Dot Grid matching Hero Section (without aurora)
+  const { scrollYProgress } = useScroll({
+    target: containerRef,
+    offset: ['start start', 'end end'],
+  });
+  const bgDotsY = useTransform(scrollYProgress, [0, 1], [0, -140]);
+
   // Scroll listener to update active layer based on scroll progress within the sticky section
   useEffect(() => {
     const handleScroll = () => {
@@ -216,8 +223,10 @@ export const EcosystemArchitectureSection: React.FC<EcosystemArchitectureSection
   return (
     <>
       {/* 1. Normal Flow Heading Section: Scrolls up naturally and does NOT stay pinned in the mounted component */}
-      <div className="w-full bg-[#FCFCFB] pt-16 sm:pt-20 pb-8 sm:pb-12 border-t border-neutral-200">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="relative w-full bg-[#FCFCFB] pt-16 sm:pt-20 pb-8 sm:pb-12 border-t border-neutral-200 overflow-hidden">
+        {/* Ambient Dot Grid matching Hero Section */}
+        <div className="absolute inset-0 bg-dot-grid opacity-60 pointer-events-none z-0" />
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
           <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-medium tracking-tight text-neutral-950 leading-[1.12]">
             Your entire agent ecosystem,<br />
             One view.
@@ -233,7 +242,13 @@ export const EcosystemArchitectureSection: React.FC<EcosystemArchitectureSection
       >
         {/* Pinned Sticky Section (Docks directly below navbar, never behind it) */}
         <section className="sticky top-[60px] sm:top-[68px] h-[calc(100dvh-60px)] sm:h-[calc(100dvh-68px)] w-full overflow-hidden bg-[#FCFCFB] text-neutral-900 border-b border-neutral-200 flex flex-col justify-between px-3 sm:px-6 lg:px-8 py-1.5 sm:py-2.5 lg:py-6 select-none z-20">
-          <div className="max-w-7xl mx-auto w-full h-full flex flex-col justify-center min-h-0">
+          {/* Parallax Dot Grid Background (matching Hero Section without aurora) */}
+          <motion.div
+            style={{ y: bgDotsY }}
+            className="absolute -inset-y-36 inset-x-0 bg-dot-grid opacity-75 pointer-events-none z-0 will-change-transform"
+          />
+
+          <div className="max-w-7xl mx-auto w-full h-full flex flex-col justify-between lg:justify-center min-h-0 relative z-10">
 
             {/* DESKTOP VIEW (lg+ >= 1024px) - Two-column interactive layout */}
             <div className="hidden lg:grid lg:grid-cols-12 gap-8 lg:gap-14 items-center w-full my-auto">
@@ -440,141 +455,16 @@ export const EcosystemArchitectureSection: React.FC<EcosystemArchitectureSection
 
             </div>
 
-            {/* MOBILE & TABLET VIEW (< lg / under 1024px) - Scaled 3D blocks on top with proportional presence + compact text card below, fully visible within DVH */}
-            <div className="flex lg:hidden flex-col justify-between h-full min-h-0 py-0.5 sm:py-1 gap-1.5 sm:gap-2">
+            {/* MOBILE & TABLET VIEW (< lg / under 1024px) - Balanced vertical layout */}
+            <div className="flex lg:hidden flex-col justify-between items-center h-full min-h-0 px-2 sm:px-4 pt-3.5 sm:pt-4.5 pb-4 sm:pb-6">
 
-              {/* 1. 3D Layers SVG - Proportional to dvh so card below is guaranteed 100% visible */}
-              <div className="flex-1 min-h-[150px] sm:min-h-[180px] md:min-h-[200px] max-h-[30dvh] sm:max-h-[34dvh] md:max-h-[36dvh] flex items-center justify-center relative w-full px-2 overflow-hidden">
-                <svg
-                  viewBox="10 15 720 635"
-                  className="h-full w-auto max-h-[28dvh] sm:max-h-[32dvh] md:max-h-[34dvh] max-w-[280px] sm:max-w-[340px] md:max-w-[400px] drop-shadow-md select-none object-contain"
-                  style={{ overflow: 'visible' }}
-                >
-                  <defs>
-                    {LAYER_THEMES.map((theme) => (
-                      <linearGradient key={theme.gradientIdMob} id={theme.gradientIdMob} x1="0%" y1="0%" x2="100%" y2="100%">
-                        <stop offset="0%" stopColor={theme.gradientStart} />
-                        <stop offset="100%" stopColor={theme.gradientEnd} />
-                      </linearGradient>
-                    ))}
-                  </defs>
-
-                  {renderedPlanes.map((plane) => {
-                    const idx = plane.index;
-                    const isActive = activeIndex === idx;
-                    const theme = LAYER_THEMES[idx];
-                    const baseY = plane.baseY;
-                    const slabThickness = 17;
-
-                    const pLeft = { x: 30, y: baseY + 120 };
-                    const pTop = { x: 270, y: baseY };
-                    const pRight = { x: 690, y: baseY + 150 };
-                    const pBottom = { x: 440, y: baseY + 270 };
-
-                    const topFaceD = `M ${pLeft.x} ${pLeft.y} L ${pTop.x} ${pTop.y} L ${pRight.x} ${pRight.y} L ${pBottom.x} ${pBottom.y} Z`;
-                    const frontLeftD = `M ${pLeft.x} ${pLeft.y} L ${pBottom.x} ${pBottom.y} L ${pBottom.x} ${pBottom.y + slabThickness} L ${pLeft.x} ${pLeft.y + slabThickness} Z`;
-                    const frontRightD = `M ${pBottom.x} ${pBottom.y} L ${pRight.x} ${pRight.y} L ${pRight.x} ${pRight.y + slabThickness} L ${pBottom.x} ${pBottom.y + slabThickness} Z`;
-
-                    const textX = 390;
-                    const textY = baseY + 225;
-
-                    return (
-                      <g
-                        key={`mob-plane-${plane.name}`}
-                        onClick={() => scrollToLayer(idx)}
-                        className="cursor-pointer transition-all duration-300"
-                      >
-                        <path
-                          d={frontLeftD}
-                          fill={isActive ? theme.frontLeft : '#FFFFFF'}
-                          stroke="#171717"
-                          strokeWidth={isActive ? '2.2' : '1.5'}
-                          strokeLinejoin="round"
-                        />
-                        <path
-                          d={frontRightD}
-                          fill={isActive ? theme.frontRight : '#E5E5E5'}
-                          stroke="#171717"
-                          strokeWidth={isActive ? '2.2' : '1.5'}
-                          strokeLinejoin="round"
-                        />
-                        <path
-                          d={topFaceD}
-                          fill={isActive ? `url(#${theme.gradientIdMob})` : '#FFFFFF'}
-                          stroke="#171717"
-                          strokeWidth={isActive ? '2.2' : '1.5'}
-                          strokeLinejoin="round"
-                        />
-                        <g transform={`translate(${textX}, ${textY}) rotate(20)`}>
-                          <text
-                            x="0"
-                            y="0"
-                            textAnchor="middle"
-                            fill={isActive ? theme.planeTextColor : '#171717'}
-                            fontSize="26"
-                            fontWeight={isActive ? '700' : '600'}
-                            letterSpacing="-0.02em"
-                            fontFamily="inherit"
-                          >
-                            {plane.name}
-                          </text>
-                        </g>
-                      </g>
-                    );
-                  })}
-                </svg>
-              </div>
-
-              {/* 2. Below: Content-fitted card guaranteed 100% visible on all viewports and DVH */}
-              <div className="shrink-0 w-full max-w-xl mx-auto bg-white border border-[#EAE3DA] rounded-xl p-2.5 sm:p-3.5 md:p-4 shadow-xs flex flex-col gap-1.5 sm:gap-2 mb-0.5 sm:mb-1">
-
-                {/* Active Layer Header with Icon & Counter */}
+              {/* 1. Mobile Top Scroll Indicator & Progress Bar (anchors top with comfortable space below navbar) */}
+              <div className="flex flex-col gap-1.5 text-center text-[10px] sm:text-[11px] font-mono text-neutral-500 shrink-0 w-full max-w-sm sm:max-w-md md:max-w-lg mx-auto px-1 pt-1 pb-1">
                 <div className="flex items-center justify-between">
-                  <div className="flex items-center space-x-2">
-                    <span className={`w-5 h-5 sm:w-6 sm:h-6 rounded ${LAYER_THEMES[activeIndex].badgeBg} ${LAYER_THEMES[activeIndex].badgeTextColor} flex items-center justify-center shrink-0`}>
-                      <CurrentIcon size={13} strokeWidth={2.2} />
-                    </span>
-                    <h3 className="text-sm sm:text-base md:text-lg font-bold text-neutral-950">
-                      {currentLayer.name}
-                    </h3>
-                  </div>
-                  <span className="text-[10px] sm:text-xs font-mono text-neutral-600 bg-neutral-100 font-semibold px-2 py-0.5 rounded">
-                    {activeIndex + 1} / {LAYERS.length}
+                  <span className="flex items-center gap-1.5">
+                    <span className="w-1.5 h-1.5 rounded-full bg-neutral-900 animate-pulse" />
+                    <span>Scroll to step through layers ↓</span>
                   </span>
-                </div>
-
-                {/* Description & Tags */}
-                <AnimatePresence mode="wait">
-                  <motion.div
-                    key={currentLayer.id}
-                    initial={{ opacity: 0, y: 3 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -3 }}
-                    transition={{ duration: 0.16 }}
-                  >
-                    <p className="text-xs sm:text-sm text-neutral-600 font-normal leading-relaxed mb-1.5 line-clamp-2 sm:line-clamp-none">
-                      {currentLayer.description}
-                    </p>
-
-                    <div className="flex flex-wrap gap-1 sm:gap-1.5">
-                      {currentLayer.tags.map((tag) => (
-                        <span
-                          key={tag}
-                          className="px-2 sm:px-2.5 py-0.5 text-[9.5px] sm:text-xs font-medium text-neutral-700 bg-neutral-50 border border-neutral-200 rounded-full"
-                        >
-                          {tag}
-                        </span>
-                      ))}
-                    </div>
-                  </motion.div>
-                </AnimatePresence>
-
-              </div>
-
-              {/* Mobile Scroll Hint & Progress Bar */}
-              <div className="flex flex-col gap-1.5 text-center text-[10px] font-mono text-neutral-500 shrink-0 pb-1 px-4">
-                <div className="flex items-center justify-between">
-                  <span>Scroll to step through layers ↓</span>
                   <span className="font-bold text-neutral-900">0{activeIndex + 1} / 04</span>
                 </div>
                 <div className="w-full h-1 bg-neutral-200 rounded-full overflow-hidden">
@@ -584,6 +474,140 @@ export const EcosystemArchitectureSection: React.FC<EcosystemArchitectureSection
                     style={{ transform: 'scaleX(0)' }}
                   />
                 </div>
+              </div>
+
+              {/* Dynamic Body: Justified and equal spacing around layers illustration and text card box */}
+              <div className="flex-1 w-full flex flex-col justify-evenly items-center min-h-0 py-1 sm:py-2">
+
+                {/* 2. 3D Layers SVG - Proportional presence */}
+                <div className="w-full flex items-center justify-center relative shrink-0">
+                  <svg
+                    viewBox="10 15 720 635"
+                    className="h-[27dvh] sm:h-[31dvh] md:h-[35dvh] min-h-[185px] sm:min-h-[225px] md:min-h-[265px] max-h-[260px] sm:max-h-[305px] md:max-h-[355px] w-auto max-w-[285px] sm:max-w-[345px] md:max-w-[405px] drop-shadow-md select-none object-contain"
+                    style={{ overflow: 'visible' }}
+                  >
+                    <defs>
+                      {LAYER_THEMES.map((theme) => (
+                        <linearGradient key={theme.gradientIdMob} id={theme.gradientIdMob} x1="0%" y1="0%" x2="100%" y2="100%">
+                          <stop offset="0%" stopColor={theme.gradientStart} />
+                          <stop offset="100%" stopColor={theme.gradientEnd} />
+                        </linearGradient>
+                      ))}
+                    </defs>
+
+                    {renderedPlanes.map((plane) => {
+                      const idx = plane.index;
+                      const isActive = activeIndex === idx;
+                      const theme = LAYER_THEMES[idx];
+                      const baseY = plane.baseY;
+                      const slabThickness = 17;
+
+                      const pLeft = { x: 30, y: baseY + 120 };
+                      const pTop = { x: 270, y: baseY };
+                      const pRight = { x: 690, y: baseY + 150 };
+                      const pBottom = { x: 440, y: baseY + 270 };
+
+                      const topFaceD = `M ${pLeft.x} ${pLeft.y} L ${pTop.x} ${pTop.y} L ${pRight.x} ${pRight.y} L ${pBottom.x} ${pBottom.y} Z`;
+                      const frontLeftD = `M ${pLeft.x} ${pLeft.y} L ${pBottom.x} ${pBottom.y} L ${pBottom.x} ${pBottom.y + slabThickness} L ${pLeft.x} ${pLeft.y + slabThickness} Z`;
+                      const frontRightD = `M ${pBottom.x} ${pBottom.y} L ${pRight.x} ${pRight.y} L ${pRight.x} ${pRight.y + slabThickness} L ${pBottom.x} ${pBottom.y + slabThickness} Z`;
+
+                      const textX = 390;
+                      const textY = baseY + 225;
+
+                      return (
+                        <g
+                          key={`mob-plane-${plane.name}`}
+                          onClick={() => scrollToLayer(idx)}
+                          className="cursor-pointer transition-all duration-300"
+                        >
+                          <path
+                            d={frontLeftD}
+                            fill={isActive ? theme.frontLeft : '#FFFFFF'}
+                            stroke="#171717"
+                            strokeWidth={isActive ? '2.2' : '1.5'}
+                            strokeLinejoin="round"
+                          />
+                          <path
+                            d={frontRightD}
+                            fill={isActive ? theme.frontRight : '#E5E5E5'}
+                            stroke="#171717"
+                            strokeWidth={isActive ? '2.2' : '1.5'}
+                            strokeLinejoin="round"
+                          />
+                          <path
+                            d={topFaceD}
+                            fill={isActive ? `url(#${theme.gradientIdMob})` : '#FFFFFF'}
+                            stroke="#171717"
+                            strokeWidth={isActive ? '2.2' : '1.5'}
+                            strokeLinejoin="round"
+                          />
+                          <g transform={`translate(${textX}, ${textY}) rotate(20)`}>
+                            <text
+                              x="0"
+                              y="0"
+                              textAnchor="middle"
+                              fill={isActive ? theme.planeTextColor : '#171717'}
+                              fontSize="26"
+                              fontWeight={isActive ? '700' : '600'}
+                              letterSpacing="-0.02em"
+                              fontFamily="inherit"
+                            >
+                              {plane.name}
+                            </text>
+                          </g>
+                        </g>
+                      );
+                    })}
+                  </svg>
+                </div>
+
+                {/* 3. Below: Content card with generous height, breathing room, and structured spacing */}
+                <div className="w-full max-w-sm sm:max-w-md md:max-w-lg mx-auto bg-white/95 backdrop-blur-xs border border-[#E7E2D9] rounded-2xl p-4 sm:p-5 shadow-xs flex flex-col gap-2.5 sm:gap-3 shrink-0 min-h-[148px] sm:min-h-[162px]">
+
+                  {/* Active Layer Header with Icon & Counter */}
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center space-x-2.5">
+                      <span className={`w-6 h-6 sm:w-7 sm:h-7 rounded-lg ${LAYER_THEMES[activeIndex].badgeBg} ${LAYER_THEMES[activeIndex].badgeTextColor} flex items-center justify-center shrink-0 shadow-2xs`}>
+                        <CurrentIcon size={14} strokeWidth={2.2} />
+                      </span>
+                      <h3 className="text-sm sm:text-base md:text-lg font-bold text-neutral-950 tracking-tight">
+                        {currentLayer.name}
+                      </h3>
+                    </div>
+                    <span className="text-[10px] sm:text-xs font-mono text-neutral-600 bg-neutral-100 font-semibold px-2.5 py-1 rounded-md border border-neutral-200/60">
+                      {activeIndex + 1} / {LAYERS.length}
+                    </span>
+                  </div>
+
+                  {/* Description & Tags */}
+                  <AnimatePresence mode="wait">
+                    <motion.div
+                      key={currentLayer.id}
+                      initial={{ opacity: 0, y: 3 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -3 }}
+                      transition={{ duration: 0.16 }}
+                      className="flex flex-col"
+                    >
+                      <p className="text-xs sm:text-sm text-neutral-600 font-normal leading-relaxed mb-3 sm:mb-3.5 line-clamp-2 sm:line-clamp-none">
+                        {currentLayer.description}
+                      </p>
+
+                      <div className="flex flex-wrap gap-1.5 sm:gap-2">
+                        {currentLayer.tags.map((tag) => (
+                          <span
+                            key={tag}
+                            className="px-2.5 sm:px-3 py-1 text-[10px] sm:text-xs font-medium text-neutral-700 bg-neutral-50 border border-neutral-200/80 rounded-full"
+                          >
+                            {tag}
+                          </span>
+                        ))}
+                      </div>
+                    </motion.div>
+                  </AnimatePresence>
+
+                </div>
+
               </div>
 
             </div>

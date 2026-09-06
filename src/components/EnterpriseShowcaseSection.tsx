@@ -71,73 +71,57 @@ const getCircularOffset = (index: number, active: number, total: number) => {
   return diff;
 };
 
-export const EnterpriseShowcaseSection: React.FC<EnterpriseShowcaseSectionProps> = ({ onOpenDemo }) => {
+export const EnterpriseShowcaseSection: React.FC<EnterpriseShowcaseSectionProps> = ({ onOpenDemo: _onOpenDemo }) => {
   const [activeIndex, setActiveIndex] = useState(0);
-  const [isPaused, setIsPaused] = useState(false);
-  const resumeTimeoutRef = React.useRef<NodeJS.Timeout | null>(null);
   const touchStartX = React.useRef<number | null>(null);
   const touchStartY = React.useRef<number | null>(null);
 
-  const pauseTemporarily = useCallback((durationMs = 4500) => {
-    setIsPaused(true);
-    if (resumeTimeoutRef.current) clearTimeout(resumeTimeoutRef.current);
-    resumeTimeoutRef.current = setTimeout(() => {
-      setIsPaused(false);
-    }, durationMs);
+  // Auto-rotation cadence: advances every 3.0s consistently
+  // The transition itself remains relaxed (0.85s ease), but cards never stall for 10-12s
+  const AUTO_ADVANCE_CADENCE = 3000;
+  const timerRef = React.useRef<NodeJS.Timeout | null>(null);
+
+  const startAutoScroll = useCallback(() => {
+    if (timerRef.current) clearInterval(timerRef.current);
+    timerRef.current = setInterval(() => {
+      setActiveIndex((prev) => (prev + 1) % ENTERPRISE_STORIES.length);
+    }, AUTO_ADVANCE_CADENCE);
   }, []);
 
   const handleNext = useCallback(() => {
     setActiveIndex((prev) => (prev + 1) % ENTERPRISE_STORIES.length);
-  }, []);
+    startAutoScroll();
+  }, [startAutoScroll]);
 
   const handlePrev = useCallback(() => {
     setActiveIndex((prev) => (prev - 1 + ENTERPRISE_STORIES.length) % ENTERPRISE_STORIES.length);
-  }, []);
+    startAutoScroll();
+  }, [startAutoScroll]);
 
-  const onPrevClick = () => {
-    handlePrev();
-    pauseTemporarily();
-  };
-
-  const onNextClick = () => {
-    handleNext();
-    pauseTemporarily();
-  };
-
-  // Continuous auto-rotation between cards
+  // Start auto-scroll on mount and clean up on unmount
   useEffect(() => {
-    if (isPaused) return;
-    const timer = setInterval(() => {
-      handleNext();
-    }, 3500);
-    return () => clearInterval(timer);
-  }, [isPaused, handleNext]);
-
-  useEffect(() => {
+    startAutoScroll();
     return () => {
-      if (resumeTimeoutRef.current) clearTimeout(resumeTimeoutRef.current);
+      if (timerRef.current) clearInterval(timerRef.current);
     };
-  }, []);
+  }, [startAutoScroll]);
 
   // Keyboard navigation
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'ArrowRight') {
         handleNext();
-        pauseTemporarily();
       }
       if (e.key === 'ArrowLeft') {
         handlePrev();
-        pauseTemporarily();
       }
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [handleNext, handlePrev, pauseTemporarily]);
+  }, [handleNext, handlePrev]);
 
   // Touch gesture handlers for mobile swipe
   const handleTouchStart = (e: React.TouchEvent) => {
-    setIsPaused(true);
     touchStartX.current = e.touches[0].clientX;
     touchStartY.current = e.touches[0].clientY;
   };
@@ -146,7 +130,8 @@ export const EnterpriseShowcaseSection: React.FC<EnterpriseShowcaseSectionProps>
     if (touchStartX.current !== null && touchStartY.current !== null) {
       const deltaX = e.changedTouches[0].clientX - touchStartX.current;
       const deltaY = e.changedTouches[0].clientY - touchStartY.current;
-      if (Math.abs(deltaX) > 40 && Math.abs(deltaX) > Math.abs(deltaY)) {
+      // Only trigger advance on intentional horizontal swipe; don't disrupt vertical page scroll
+      if (Math.abs(deltaX) > 35 && Math.abs(deltaX) > Math.abs(deltaY)) {
         if (deltaX < 0) {
           handleNext();
         } else {
@@ -156,7 +141,6 @@ export const EnterpriseShowcaseSection: React.FC<EnterpriseShowcaseSectionProps>
     }
     touchStartX.current = null;
     touchStartY.current = null;
-    pauseTemporarily(4000);
   };
 
   return (
@@ -177,7 +161,7 @@ export const EnterpriseShowcaseSection: React.FC<EnterpriseShowcaseSectionProps>
           <div className="flex items-center space-x-3">
             <button
               id="enterprise-carousel-prev"
-              onClick={onPrevClick}
+              onClick={handlePrev}
               aria-label="Previous story"
               className="w-10 h-10 sm:w-11 sm:h-11 rounded-none border border-neutral-300 bg-white hover:border-neutral-900 text-neutral-800 flex items-center justify-center transition-all duration-200 shadow-xs active:scale-95 cursor-pointer"
             >
@@ -185,7 +169,7 @@ export const EnterpriseShowcaseSection: React.FC<EnterpriseShowcaseSectionProps>
             </button>
             <button
               id="enterprise-carousel-next"
-              onClick={onNextClick}
+              onClick={handleNext}
               aria-label="Next story"
               className="w-10 h-10 sm:w-11 sm:h-11 rounded-none border border-neutral-300 bg-white hover:border-neutral-900 text-neutral-800 flex items-center justify-center transition-all duration-200 shadow-xs active:scale-95 cursor-pointer"
             >
@@ -205,7 +189,7 @@ export const EnterpriseShowcaseSection: React.FC<EnterpriseShowcaseSectionProps>
               isExpanded={activeIndex === idx}
               onSelect={() => {
                 setActiveIndex(idx);
-                pauseTemporarily();
+                startAutoScroll();
               }}
             />
           ))}
@@ -218,12 +202,10 @@ export const EnterpriseShowcaseSection: React.FC<EnterpriseShowcaseSectionProps>
         {/* ---------------------------------------------------- */}
         <div className="block lg:hidden">
           <div
-            className="relative w-full h-[460px] sm:h-[500px] overflow-hidden select-none touch-pan-y"
+            className="relative w-full h-[480px] sm:h-[520px] overflow-x-clip select-none touch-pan-y"
             style={{ perspective: 1000 }}
             onTouchStart={handleTouchStart}
             onTouchEnd={handleTouchEnd}
-            onMouseEnter={() => setIsPaused(true)}
-            onMouseLeave={() => setIsPaused(false)}
           >
             {ENTERPRISE_STORIES.map((story, idx) => {
               const offset = getCircularOffset(idx, activeIndex, ENTERPRISE_STORIES.length);
@@ -249,8 +231,8 @@ export const EnterpriseShowcaseSection: React.FC<EnterpriseShowcaseSectionProps>
                     opacity: opacityVal,
                   }}
                   transition={{
-                    duration: 0.55,
-                    ease: [0.25, 1, 0.5, 1],
+                    duration: 0.85,
+                    ease: [0.22, 1, 0.36, 1],
                   }}
                   style={{
                     zIndex: zIndexVal,
@@ -259,17 +241,17 @@ export const EnterpriseShowcaseSection: React.FC<EnterpriseShowcaseSectionProps>
                   onClick={() => {
                     if (isLeft) {
                       handlePrev();
-                      pauseTemporarily();
                     } else if (isRight) {
                       handleNext();
-                      pauseTemporarily();
                     }
                   }}
-                  className={`absolute top-1/2 left-1/2 -translate-y-1/2 w-[74%] max-w-[320px] h-[420px] sm:h-[450px] rounded-none overflow-hidden bg-neutral-950 border border-white/15 shadow-2xl transition-shadow duration-300 ${
-                    isCenter ? 'cursor-default shadow-black/60' : 'cursor-pointer shadow-black/30'
+                  className={`absolute top-1/2 left-1/2 -translate-y-1/2 w-[74%] max-w-[320px] h-[410px] sm:h-[440px] rounded-none overflow-hidden bg-neutral-950 border border-white/15 transition-shadow duration-700 ${
+                    isCenter
+                      ? 'cursor-default shadow-[0_20px_45px_-12px_rgba(0,0,0,0.4)]'
+                      : 'cursor-pointer shadow-[0_10px_24px_-10px_rgba(0,0,0,0.22)]'
                   }`}
                 >
-                  {/* Full color image with sharp corners */}
+                  {/* Image: Active card in full vibrant color, non-active cards in B&W */}
                   <img
                     src={story.imageUrl}
                     alt={story.imageAlt}
@@ -277,7 +259,11 @@ export const EnterpriseShowcaseSection: React.FC<EnterpriseShowcaseSectionProps>
                     height="480"
                     loading="lazy"
                     decoding="async"
-                    className="absolute inset-0 w-full h-full object-cover grayscale-0 brightness-[0.84] rounded-none pointer-events-none select-none"
+                    className={`absolute inset-0 w-full h-full object-cover rounded-none pointer-events-none select-none transition-all duration-700 ease-out ${
+                      isCenter
+                        ? 'grayscale-0 brightness-[0.88] contrast-[1.02]'
+                        : 'grayscale contrast-[1.08] brightness-[0.55]'
+                    }`}
                     referrerPolicy="no-referrer"
                   />
 
@@ -291,13 +277,15 @@ export const EnterpriseShowcaseSection: React.FC<EnterpriseShowcaseSectionProps>
                       alt={story.logoAlt}
                       width="140"
                       height="32"
-                      className="h-6 sm:h-7 w-auto object-contain filter brightness-0 invert"
+                      className={`h-6 sm:h-7 w-auto object-contain filter brightness-0 invert transition-opacity duration-500 ${
+                        isCenter ? 'opacity-100' : 'opacity-65'
+                      }`}
                     />
                   </div>
 
-                  {/* Narrative text: only visible when in center */}
+                  {/* Narrative text: prominent and visible on the center active card */}
                   <div
-                    className={`absolute inset-0 p-6 sm:p-7 flex flex-col justify-end z-20 pointer-events-none transition-opacity duration-300 ${
+                    className={`absolute inset-0 p-6 sm:p-7 flex flex-col justify-end z-20 pointer-events-none transition-opacity duration-500 ${
                       isCenter ? 'opacity-100' : 'opacity-0'
                     }`}
                   >
@@ -306,10 +294,12 @@ export const EnterpriseShowcaseSection: React.FC<EnterpriseShowcaseSectionProps>
                     </p>
                   </div>
 
-                  {/* Dark scrim over side cards */}
-                  {!isCenter && (
-                    <div className="absolute inset-0 bg-black/30 z-10 pointer-events-none rounded-none" />
-                  )}
+                  {/* Dark tint scrim over non-active cards */}
+                  <div
+                    className={`absolute inset-0 bg-black/40 z-10 pointer-events-none rounded-none transition-opacity duration-700 ${
+                      isCenter ? 'opacity-0' : 'opacity-100'
+                    }`}
+                  />
                 </motion.div>
               );
             })}
@@ -322,7 +312,7 @@ export const EnterpriseShowcaseSection: React.FC<EnterpriseShowcaseSectionProps>
                 key={story.id}
                 onClick={() => {
                   setActiveIndex(i);
-                  pauseTemporarily();
+                  startAutoScroll();
                 }}
                 aria-label={`Go to ${story.company}`}
                 className={`h-1 transition-all duration-300 cursor-pointer rounded-none ${

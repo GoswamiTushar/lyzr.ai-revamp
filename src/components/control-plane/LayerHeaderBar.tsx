@@ -29,10 +29,6 @@ export const LayerHeaderBar: React.FC<LayerHeaderBarProps> = ({
         </div>
 
         <div className="flex items-center space-x-3 text-xs font-mono">
-          <div className="hidden sm:flex items-center space-x-1.5 text-neutral-500">
-            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-            <span className="text-[11px]">100% IN-VPC</span>
-          </div>
           <div className="flex items-center space-x-1.5 text-neutral-950 font-bold bg-[#E5FE54]/40 border border-[#E5FE54] px-2 sm:px-2.5 py-0.5 rounded-full text-[11px] sm:text-xs">
             <span className="w-2 h-2 rounded-full bg-black animate-pulse" />
             <span>LAYER 0{activeLayerIndex + 1} OF 07</span>

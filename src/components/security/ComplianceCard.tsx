@@ -309,26 +309,31 @@ export const ComplianceCard: React.FC<ComplianceCardProps> = ({
     );
   }
 
-  // Default Vertical Badge Card Layout (preserved 100% for mobile/tablet horizontal track)
+  // Default Vertical Badge Card Layout (mobile/tablet horizontal track)
   return (
     <div
-      className={`shrink-0 relative group rounded-2xl p-3.5 sm:p-4 md:p-5 lg:p-6 flex flex-col items-center text-center justify-between transition-all duration-300 backdrop-blur-xs select-none ${
+      className={`shrink-0 relative group rounded-2xl p-3 sm:p-4 md:p-5 flex flex-col items-center text-center justify-between transition-all duration-300 backdrop-blur-xs select-none border ${
         isActive
           ? 'bg-[#1c1c1c] border-[#E5FE54]/70 shadow-[0_0_30px_rgba(229,254,84,0.12)] scale-[1.015]'
           : 'bg-[#161616]/90 border-white/10 hover:border-[#E5FE54]/40 hover:bg-[#1a1a1a] hover:shadow-[0_0_20px_rgba(229,254,84,0.06)]'
-      } border ${className || 'w-[240px] sm:w-[265px] md:w-[285px] lg:w-auto h-full max-h-[50dvh] sm:max-h-[54dvh] md:max-h-[58dvh] min-h-[290px] sm:min-h-[320px] md:min-h-[350px] lg:min-h-[345px]'}`}
+      } ${className || 'w-[225px] sm:w-[255px] md:w-[280px] lg:w-auto h-auto min-h-0'}`}
     >
-      {/* Top Code Badge */}
-      <div className="w-full flex items-center justify-between text-[10px] font-mono mb-1.5 sm:mb-2">
-        <span className={`tracking-wider transition-colors duration-200 ${isActive ? 'text-[#E5FE54]' : 'text-neutral-400'}`}>
+      {/* Top Code Badge & Verified Status */}
+      <div className="w-full flex items-center justify-between text-[10px] sm:text-[11px] font-mono shrink-0 mb-1 sm:mb-1.5">
+        <span className={`tracking-wider font-semibold transition-colors duration-200 ${isActive ? 'text-[#E5FE54]' : 'text-neutral-400'}`}>
           {item.badgeCode}
         </span>
-        <CheckCircle size={13} className={`transition-colors duration-200 ${isActive ? 'text-[#E5FE54]' : 'text-emerald-400'}`} />
+        <div className="flex items-center space-x-1">
+          <CheckCircle size={12} className={`transition-colors duration-200 ${isActive ? 'text-[#E5FE54]' : 'text-emerald-400'}`} />
+          <span className={`text-[9px] font-mono tracking-wider uppercase transition-colors duration-200 ${isActive ? 'text-[#E5FE54]' : 'text-emerald-400'}`}>
+            Verified
+          </span>
+        </div>
       </div>
 
       {/* SVG Emblem with subtle aura */}
-      <div className={`w-14 h-14 sm:w-16 sm:h-16 md:w-20 md:h-20 my-1 relative flex items-center justify-center transition-transform duration-300 ${
-        isActive ? 'scale-110' : 'group-hover:scale-105'
+      <div className={`w-11 h-11 sm:w-13 sm:h-13 md:w-16 md:h-16 shrink-0 my-0.5 sm:my-1 relative flex items-center justify-center transition-transform duration-300 ${
+        isActive ? 'scale-105' : 'group-hover:scale-105'
       }`}>
         <div className={`absolute inset-0 rounded-full blur-md transition-opacity duration-300 ${
           isActive ? 'bg-[#E5FE54]/20 opacity-100' : 'bg-white/5 opacity-0 group-hover:opacity-100'
@@ -337,22 +342,22 @@ export const ComplianceCard: React.FC<ComplianceCardProps> = ({
       </div>
 
       {/* Middle Label & Scope */}
-      <div className="mt-2 pt-2 border-t border-white/5 w-full">
+      <div className="mt-1 sm:mt-1.5 pt-1.5 sm:pt-2 border-t border-white/5 w-full shrink-0">
         <div className={`text-xs sm:text-[13px] font-mono font-bold tracking-wider uppercase transition-colors duration-200 ${
           isActive ? 'text-[#E5FE54]' : 'text-white group-hover:text-[#E5FE54]'
         }`}>
           {item.name}
         </div>
-        <div className="text-[10.5px] sm:text-[11px] text-neutral-400 mt-0.5 font-sans">
+        <div className="text-[10px] sm:text-[10.5px] text-neutral-400 mt-0.5 font-sans truncate">
           {item.scope}
         </div>
       </div>
 
-      {/* Detail Info: Always visible on mobile/tablet; on desktop reveals dynamically when card is active or hovered */}
-      <div className="mt-2 pt-1.5 border-t border-white/5 w-full min-h-[44px] sm:min-h-[48px] flex items-center justify-center">
-        <p className={`text-[10px] sm:text-[11px] leading-relaxed font-sans transition-all duration-300 ${
+      {/* Detail Info: Always visible on mobile/tablet */}
+      <div className="mt-1 sm:mt-1.5 pt-1 sm:pt-1.5 border-t border-white/5 w-full flex items-center justify-center">
+        <p className={`text-[9.5px] sm:text-[10.5px] leading-snug sm:leading-relaxed font-sans transition-all duration-300 ${
           isActive
-            ? 'opacity-100 text-neutral-100'
+            ? 'opacity-100 text-neutral-100 font-normal'
             : isRevealed
             ? 'opacity-85 text-neutral-200'
             : 'opacity-100 lg:opacity-0 lg:group-hover:opacity-100 text-neutral-300'

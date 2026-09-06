@@ -108,6 +108,21 @@ export const SecurityGovernanceSection: React.FC = () => {
     window.scrollTo({ top: targetScrollY, behavior: 'smooth' });
   };
 
+  const touchStartXRef = useRef<number>(0);
+
+  const handleTouchStart = (e: React.TouchEvent) => {
+    touchStartXRef.current = e.touches[0].clientX;
+  };
+
+  const handleTouchEnd = (e: React.TouchEvent) => {
+    const deltaX = e.changedTouches[0].clientX - touchStartXRef.current;
+    if (deltaX < -35) {
+      scrollToCard('right');
+    } else if (deltaX > 35) {
+      scrollToCard('left');
+    }
+  };
+
   const activeCardIndex = Math.min(4, Math.floor(scrollProgress * 4.99));
 
   return (
@@ -151,36 +166,36 @@ export const SecurityGovernanceSection: React.FC = () => {
         <div className="sticky top-[60px] sm:top-[68px] h-[calc(100dvh-60px)] sm:h-[calc(100dvh-68px)] w-full overflow-hidden flex flex-col justify-between py-2 sm:py-3.5 relative z-20">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 relative z-10 w-full h-full flex flex-col justify-between min-h-0">
             {/* Top Split Header on Mobile/Tablet with subtle frosted plate for clarity */}
-            <div className="p-4 -m-2 rounded-2xl bg-[#0A0A0A]/75 backdrop-blur-md border border-white/5 flex flex-col justify-between gap-2 sm:gap-3.5 mb-1.5 sm:mb-3 pb-2 sm:pb-3 border-b border-neutral-800/60 shrink-0">
+            <div className="p-3 sm:p-4 rounded-xl sm:rounded-2xl bg-[#0A0A0A]/85 backdrop-blur-md border border-white/5 flex flex-col justify-between gap-1.5 sm:gap-2.5 mb-1 sm:mb-2 pb-2 sm:pb-3 border-b border-neutral-800/60 shrink-0">
               <div>
-                <div className="flex items-center space-x-2 text-[10px] sm:text-xs font-mono font-bold uppercase tracking-widest text-[#E5FE54] mb-1 sm:mb-1.5">
+                <div className="flex items-center space-x-2 text-[10px] sm:text-xs font-mono font-bold uppercase tracking-widest text-[#E5FE54] mb-0.5 sm:mb-1">
                   <ShieldCheck size={13} className="text-[#E5FE54]" />
                   <span>Enterprise Grade Trust & Sovereignty</span>
                 </div>
-                <h2 className="text-xl sm:text-2xl md:text-3xl font-normal text-white tracking-tight leading-[1.12]">
+                <h2 className="text-lg sm:text-2xl md:text-3xl font-normal text-white tracking-tight leading-[1.14]">
                   Strong on offense.<br />
                   <span className="text-neutral-200">Serious on defense.</span>
                 </h2>
               </div>
 
               <div className="max-w-md">
-                <p className="text-neutral-300 text-[11px] sm:text-xs leading-relaxed line-clamp-2 sm:line-clamp-none">
+                <p className="text-neutral-300 text-[10.5px] sm:text-xs leading-snug line-clamp-2 sm:line-clamp-none">
                   Lyzr is built for enterprise security, governance, and compliance across identity, data, access, and infrastructure.
                 </p>
 
                 {/* Status and Mobile/Tablet Scrolljacking Controls */}
-                <div className="mt-1.5 sm:mt-2.5 flex flex-wrap items-center justify-between gap-2.5">
-                  <div className="flex items-center space-x-2 text-[10px] sm:text-xs font-mono text-neutral-400">
-                    <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-                    <span>Real-time SOC 2 & ISO monitor active</span>
+                <div className="mt-1.5 sm:mt-2 flex items-center justify-between gap-2">
+                  <div className="flex items-center space-x-1.5 text-[9.5px] sm:text-xs font-mono text-neutral-400 min-w-0">
+                    <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse shrink-0" />
+                    <span className="truncate">Real-time SOC 2 & ISO monitor active</span>
                   </div>
 
                   {/* Interactive Progress & Controls on Mobile/Tablet */}
-                  <div className="flex items-center space-x-2.5">
-                    <div className="flex items-center space-x-1.5 text-[10px] sm:text-xs font-mono text-neutral-400">
+                  <div className="flex items-center space-x-2 shrink-0">
+                    <div className="flex items-center space-x-1 text-[10px] sm:text-xs font-mono text-neutral-400">
                       <span className="text-[#E5FE54] font-bold">0{activeCardIndex + 1}</span>
                       <span>/ 05</span>
-                      <div className="w-14 sm:w-20 h-1 bg-neutral-800 rounded-full overflow-hidden">
+                      <div className="w-10 sm:w-16 h-1 bg-neutral-800 rounded-full overflow-hidden">
                         <div
                           className="h-full bg-[#E5FE54] transition-all duration-75"
                           style={{ width: `${Math.max(12, scrollProgress * 100)}%` }}
@@ -215,22 +230,30 @@ export const SecurityGovernanceSection: React.FC = () => {
             <div className="relative w-full overflow-hidden flex-1 flex items-center min-h-0 py-1 sm:py-2">
               <div
                 ref={cardsTrackRef}
-                className="flex flex-nowrap gap-3 sm:gap-4 items-stretch will-change-transform w-full"
+                onTouchStart={handleTouchStart}
+                onTouchEnd={handleTouchEnd}
+                className="flex flex-nowrap gap-3 sm:gap-4 items-center will-change-transform w-full"
               >
-                {COMPLIANCE_ITEMS.map((item) => (
-                  <ComplianceCard key={item.id} item={item} layout="vertical" />
+                {COMPLIANCE_ITEMS.map((item, idx) => (
+                  <ComplianceCard
+                    key={item.id}
+                    item={item}
+                    layout="vertical"
+                    isActive={idx === activeCardIndex}
+                    isRevealed={idx <= activeCardIndex}
+                  />
                 ))}
                 <div className="shrink-0 w-2 sm:w-4 pointer-events-none" aria-hidden="true" />
               </div>
             </div>
 
             {/* Bottom Trust & Scroll Indicator Bar on Mobile/Tablet */}
-            <div className="mt-1.5 sm:mt-2.5 pt-2 sm:pt-2.5 border-t border-neutral-800/60 shrink-0 flex flex-wrap items-center justify-between gap-2">
-              <div className="flex items-center space-x-2 text-[10px] sm:text-[11px] font-mono text-neutral-400">
+            <div className="mt-1 sm:mt-1.5 pt-1.5 sm:pt-2 border-t border-neutral-800/60 shrink-0 flex flex-wrap items-center justify-between gap-1.5">
+              <div className="flex items-center space-x-2 text-[9.5px] sm:text-[11px] font-mono text-neutral-400">
                 <span className="text-[#E5FE54]">↔</span>
-                <span>Scroll vertically to pan through all certifications</span>
+                <span>Scroll or swipe to pan certifications</span>
               </div>
-              <div className="flex items-center space-x-2.5 sm:space-x-4 text-[9.5px] sm:text-[10.5px] font-mono text-neutral-500">
+              <div className="flex items-center space-x-2 sm:space-x-3 text-[9px] sm:text-[10px] font-mono text-neutral-500">
                 <span>Zero-Egress VPC</span>
                 <span>•</span>
                 <span>AES-256</span>

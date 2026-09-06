@@ -149,6 +149,15 @@
   background: #333333;
 }
 
+/* Seamless hide-scrollbar utility for interactive marquee rows */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
 /* 3D Infinite Marquee Animation for Trusted Logos */
 @keyframes marquee-scroll {
   0% {
