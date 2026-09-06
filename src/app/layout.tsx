@@ -69,6 +69,13 @@ export const metadata: Metadata = {
       'Enterprise AI Agent Platform. Agents built on AWS, Azure, LangChain, Agentforce, or anywhere else – all governed, observed, and controlled from a single control plane.',
     images: ['https://www.lyzr.ai/wp-content/uploads/2024/02/Lyzr-OG.png'],
   },
+  icons: {
+    icon: [
+      { url: '/favicon.svg', type: 'image/svg+xml' },
+    ],
+    shortcut: '/favicon.svg',
+    apple: '/favicon.svg',
+  },
 };
 
 export default function RootLayout({
