@@ -99,20 +99,15 @@ export const LayerCard: React.FC<LayerCardProps> = ({
                 <button
                   key={l.id}
                   onClick={() => onJumpToLayer(idx)}
-                  className={`h-5 sm:h-6 px-1.5 sm:px-2 text-[9px] sm:text-[10px] font-mono font-bold rounded transition-all cursor-pointer ${
-                    idx === activeLayerIndex
-                      ? 'bg-[#E5FE54] text-neutral-950 shadow-xs scale-105'
-                      : 'bg-neutral-900 text-neutral-400 hover:text-white hover:bg-neutral-800'
-                  }`}
+                  className={`h-5 sm:h-6 px-1.5 sm:px-2 text-[9px] sm:text-[10px] font-mono font-bold rounded transition-all cursor-pointer ${idx === activeLayerIndex
+                    ? 'bg-[#E5FE54] text-neutral-950 shadow-xs scale-105'
+                    : 'bg-neutral-900 text-neutral-400 hover:text-white hover:bg-neutral-800'
+                    }`}
                   title={`Rotate to Layer ${l.id}: ${l.title}`}
                 >
                   0{idx + 1}
                 </button>
               ))}
-            </div>
-
-            <div className="text-[10px] font-mono text-neutral-400 hidden sm:block">
-              Scroll to rotate 3D model
             </div>
 
             <div className="flex items-center space-x-1.5">

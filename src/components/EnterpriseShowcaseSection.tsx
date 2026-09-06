@@ -93,7 +93,7 @@ export const EnterpriseShowcaseSection: React.FC<EnterpriseShowcaseSectionProps>
       className="section-deferred relative py-20 lg:py-28 bg-white border-b border-neutral-200 overflow-hidden"
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-        
+
         {/* Header Block: Exact Title from Screenshot + Prev/Next Controls */}
         <div className="flex items-center justify-between gap-6 mb-10 lg:mb-14">
           <h2 className="text-3xl sm:text-4xl lg:text-5xl font-normal text-neutral-950 tracking-tight font-sans">
@@ -180,11 +180,11 @@ export const EnterpriseShowcaseSection: React.FC<EnterpriseShowcaseSectionProps>
         {/* ---------------------------------------------------- */}
         {/* BOTTOM LOGOS SELECTOR (Matching the reference ss)     */}
         {/* ---------------------------------------------------- */}
-        <EnterpriseTabNav
+        {/* <EnterpriseTabNav
           stories={ENTERPRISE_STORIES}
           activeIndex={activeIndex}
           onSelect={setActiveIndex}
-        />
+        /> */}
 
       </div>
     </section>

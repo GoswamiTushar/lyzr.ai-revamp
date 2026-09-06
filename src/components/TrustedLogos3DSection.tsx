@@ -126,9 +126,9 @@ export const TrustedLogos3DSection: React.FC = () => {
       style={{ perspective: '1600px' }}
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-        
+
         {/* Subtle eyebrow label for context */}
-        <div className="text-center mb-3 sm:mb-8">
+        <div className="text-center mb-1 sm:mb-0">
           <p className="text-[10px] sm:text-[11px] font-mono font-medium uppercase tracking-[0.2em] sm:tracking-[0.25em] text-neutral-400">
             Trusted by Leading Enterprise AI Teams
           </p>
