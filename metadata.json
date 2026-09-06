@@ -1,0 +1,6 @@
+{
+  "name": "Lyzr Enterprise AI Agent Platform",
+  "description": "Enterprise AI Agent Platform. Agents built on AWS, Azure, LangChain, Agentforce, or anywhere else – all governed, observed, and controlled from a single control plane.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
