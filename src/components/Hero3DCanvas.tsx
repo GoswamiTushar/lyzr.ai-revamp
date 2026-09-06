@@ -58,12 +58,12 @@ export const Hero3DCanvas: React.FC<Hero3DCanvasProps> = ({
     // Scene setup
     const scene = new THREE.Scene();
     
-    // Perspective camera positioned to match the perspective in image.png with responsive distance
-    const initialDistance = width < 640 ? 9.2 : (width < 1024 ? 8.4 : 7.8);
-    const initialY = width < 640 ? 1.4 : 1.2;
-    const camera = new THREE.PerspectiveCamera(42, width / height, 0.1, 1000);
+    // Perspective camera positioned with closer distance on mobile/tablet so the 3D model is prominent
+    const initialDistance = width < 640 ? 6.2 : (width < 1024 ? 6.8 : 7.6);
+    const initialY = width < 640 ? 0.9 : (width < 1024 ? 1.0 : 1.15);
+    const camera = new THREE.PerspectiveCamera(44, width / height, 0.1, 1000);
     camera.position.set(0, initialY, initialDistance);
-    camera.lookAt(0, 0.2, 0);
+    camera.lookAt(0, 0.15, 0);
 
     // Renderer
     const renderer = new THREE.WebGLRenderer({
@@ -489,11 +489,14 @@ export const Hero3DCanvas: React.FC<Hero3DCanvasProps> = ({
       height = container.clientHeight || 600;
       camera.aspect = width / height;
       if (width < 640) {
-        camera.position.set(0, 1.4, 9.4);
+        camera.position.set(0, 0.9, 6.2);
+        camera.lookAt(0, 0.15, 0);
       } else if (width < 1024) {
-        camera.position.set(0, 1.3, 8.4);
+        camera.position.set(0, 1.0, 6.8);
+        camera.lookAt(0, 0.15, 0);
       } else {
-        camera.position.set(0, 1.2, 7.8);
+        camera.position.set(0, 1.15, 7.6);
+        camera.lookAt(0, 0.2, 0);
       }
       camera.updateProjectionMatrix();
       renderer.setSize(width, height);
@@ -626,7 +629,7 @@ export const Hero3DCanvas: React.FC<Hero3DCanvasProps> = ({
   return (
     <div
       id="lyzr-3d-model-stage"
-      className={`relative w-full h-[460px] sm:h-[540px] lg:h-[600px] xl:h-[640px] flex items-center justify-center select-none ${className}`}
+      className={`relative w-full h-[320px] sm:h-[380px] md:h-[440px] lg:h-[600px] xl:h-[640px] flex items-center justify-center select-none ${className}`}
     >
       {/* Three.js Canvas Container */}
       <div

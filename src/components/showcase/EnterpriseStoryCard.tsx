@@ -29,7 +29,7 @@ export const EnterpriseStoryCard: React.FC<EnterpriseStoryCardProps> = ({
       id={`enterprise-card-${story.id}`}
       onMouseEnter={onSelect}
       onClick={onSelect}
-      className={`group relative rounded-2xl overflow-hidden cursor-pointer transition-all duration-700 ease-[cubic-bezier(0.25,1,0.5,1)] ${
+      className={`group relative rounded-none overflow-hidden cursor-pointer transition-all duration-700 ease-[cubic-bezier(0.25,1,0.5,1)] ${
         isExpanded
           ? 'flex-[3.5] shadow-xl ring-1 ring-black/10'
           : 'flex-1 hover:flex-[1.4] shadow-sm'

@@ -97,26 +97,8 @@ export const TrustedLogos3DSection: React.FC = () => {
     isDraggingRef.current = false;
   };
 
-  // Cylinder radius calibrated to provide balanced, cohesive spacing without huge gaps or clipping
-  const [cylinderRadius, setCylinderRadius] = useState<number>(() => {
-    if (typeof window !== 'undefined') {
-      const w = window.innerWidth;
-      if (w < 640) return 230;
-      if (w < 1024) return 380;
-    }
-    return 480;
-  });
-
-  useEffect(() => {
-    const updateRadius = () => {
-      const w = window.innerWidth;
-      if (w < 640) setCylinderRadius(230);
-      else if (w < 1024) setCylinderRadius(380);
-      else setCylinderRadius(480);
-    };
-    window.addEventListener('resize', updateRadius);
-    return () => window.removeEventListener('resize', updateRadius);
-  }, []);
+  // 3D Rolling Cylinder responsive radius is handled via .cylinder-stage CSS variables
+  // to guarantee 100% byte-for-byte SSR hydration match without window.innerWidth divergence
 
   return (
     <div
@@ -135,11 +117,44 @@ export const TrustedLogos3DSection: React.FC = () => {
         </div>
 
         {/* ---------------------------------------------------- */}
-        {/* REACT BITS 3D ROLLING CYLINDER                       */}
+        {/* MOBILE & TABLET: Continuous Infinite Auto-Scroll      */}
+        {/* Multiple logos visible simultaneously, zero gap,      */}
+        {/* silky-smooth 60fps continuous horizontal stream       */}
+        {/* ---------------------------------------------------- */}
+        <div className="block lg:hidden relative w-full overflow-hidden py-3 select-none">
+          {/* Edge gradient fade masks */}
+          <div className="absolute left-0 inset-y-0 w-12 sm:w-16 bg-gradient-to-r from-white via-white/80 to-transparent z-10 pointer-events-none" />
+          <div className="absolute right-0 inset-y-0 w-12 sm:w-16 bg-gradient-to-l from-white via-white/80 to-transparent z-10 pointer-events-none" />
+
+          <div
+            className="flex w-max animate-marquee"
+            style={{
+              animationPlayState: isPaused ? 'paused' : 'running',
+            }}
+            onTouchStart={() => setIsPaused(true)}
+            onTouchEnd={() => setIsPaused(false)}
+          >
+            {/* Track 1 */}
+            <div className="flex shrink-0 items-center gap-3.5 sm:gap-4 pr-3.5 sm:pr-4">
+              {CLIENT_LOGOS.map((logo) => (
+                <AdaptiveLogoCard key={`mobile-t1-${logo.name}`} logo={logo} />
+              ))}
+            </div>
+            {/* Track 2 (Duplicate for unbroken loop) */}
+            <div className="flex shrink-0 items-center gap-3.5 sm:gap-4 pr-3.5 sm:pr-4" aria-hidden="true">
+              {CLIENT_LOGOS.map((logo) => (
+                <AdaptiveLogoCard key={`mobile-t2-${logo.name}`} logo={logo} />
+              ))}
+            </div>
+          </div>
+        </div>
+
+        {/* ---------------------------------------------------- */}
+        {/* DESKTOP EXPERIENCE: 3D Rolling Cylinder with Drag     */}
         {/* Balanced spacing between blades, zero cutoff         */}
         {/* ---------------------------------------------------- */}
         <div
-          className="relative h-[115px] sm:h-[165px] md:h-[180px] flex items-center justify-center cursor-grab active:cursor-grabbing select-none"
+          className="hidden lg:flex relative h-[165px] md:h-[180px] items-center justify-center cursor-grab active:cursor-grabbing select-none"
           onMouseEnter={() => setIsPaused(true)}
           onMouseLeave={() => {
             setIsPaused(false);
@@ -148,12 +163,9 @@ export const TrustedLogos3DSection: React.FC = () => {
           onMouseDown={(e) => handleDragStart(e.clientX)}
           onMouseMove={(e) => handleDragMove(e.clientX)}
           onMouseUp={handleDragEnd}
-          onTouchStart={(e) => handleDragStart(e.touches[0].clientX)}
-          onTouchMove={(e) => handleDragMove(e.touches[0].clientX)}
-          onTouchEnd={handleDragEnd}
         >
           {/* Subtle bottom shadow floor */}
-          <div className="absolute inset-x-0 bottom-0 h-6 sm:h-8 bg-radial from-neutral-200/30 via-transparent to-transparent blur-md pointer-events-none" />
+          <div className="absolute inset-x-0 bottom-0 h-8 bg-radial from-neutral-200/30 via-transparent to-transparent blur-md pointer-events-none" />
 
           {/* 3D Cylinder Stage with ample vertical headroom to prevent clipping */}
           <div
@@ -167,7 +179,7 @@ export const TrustedLogos3DSection: React.FC = () => {
           >
             <div
               ref={cylinderRef}
-              className="relative w-[96px] sm:w-[150px] md:w-[165px] h-[50px] sm:h-[70px] md:h-[74px]"
+              className="cylinder-stage relative w-[165px] h-[74px]"
               style={{
                 transformStyle: 'preserve-3d',
                 transform: 'rotateY(0deg)',
@@ -183,7 +195,7 @@ export const TrustedLogos3DSection: React.FC = () => {
                     className="absolute inset-0 flex items-center justify-center"
                     style={{
                       transformStyle: 'preserve-3d',
-                      transform: `rotateY(${angle}deg) translateZ(${cylinderRadius}px)`,
+                      transform: `rotateY(${angle}deg) translateZ(var(--cylinder-radius, 480px))`,
                       backfaceVisibility: 'hidden',
                       WebkitBackfaceVisibility: 'hidden',
                     }}
@@ -212,7 +224,7 @@ interface AdaptiveLogoCardProps {
 const AdaptiveLogoCard: React.FC<AdaptiveLogoCardProps> = ({ logo }) => {
   return (
     <div
-      className="group relative flex flex-col items-center justify-center w-[135px] sm:w-[155px] md:w-[175px] h-[64px] sm:h-[72px] md:h-[78px] px-3 py-1.5 rounded-xl bg-white border border-neutral-200/90 shadow-xs hover:border-neutral-400 hover:shadow-md hover:-translate-y-1 transition-all duration-300 select-none"
+      className="group relative flex flex-col items-center justify-center shrink-0 w-[135px] sm:w-[155px] md:w-[175px] h-[64px] sm:h-[72px] md:h-[78px] px-3 py-1.5 rounded-xl bg-white border border-neutral-200/90 shadow-xs hover:border-neutral-400 hover:shadow-md hover:-translate-y-1 transition-all duration-300 select-none"
       style={{
         transformStyle: 'preserve-3d',
         backfaceVisibility: 'hidden',

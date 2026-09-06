@@ -155,12 +155,14 @@
     transform: translateX(0%);
   }
   100% {
-    transform: translateX(-100%);
+    transform: translateX(-50%);
   }
 }
 
 .animate-marquee {
-  animation: marquee-scroll 35s linear infinite;
+  display: flex;
+  width: max-content;
+  animation: marquee-scroll 32s linear infinite;
   will-change: transform;
 }
 
@@ -239,6 +241,21 @@
   body.custom-cursor-enabled [role="button"],
   body.custom-cursor-enabled .cursor-pointer {
     cursor: none;
+  }
+}
+
+/* 3D Rolling Cylinder Responsive Radius (CSS-driven to eliminate SSR hydration mismatch) */
+.cylinder-stage {
+  --cylinder-radius: 230px;
+}
+@media (min-width: 640px) {
+  .cylinder-stage {
+    --cylinder-radius: 380px;
+  }
+}
+@media (min-width: 1024px) {
+  .cylinder-stage {
+    --cylinder-radius: 480px;
   }
 }
 

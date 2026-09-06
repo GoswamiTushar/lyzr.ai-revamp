@@ -24,6 +24,7 @@ export const ControlPlaneLayers: React.FC<ControlPlaneLayersProps> = () => {
 
   const outerTrackRef = useRef<HTMLElement | null>(null);
   const stageRef = useRef<HTMLDivElement | null>(null);
+  const canvasContainerRef = useRef<HTMLDivElement | null>(null);
   const cardRef = useRef<HTMLDivElement | null>(null);
 
   // Responsive layout detection: Desktop (>= 1024px) uses side-by-side, Tablets (< 1024px) & Mobile use stacked mobile view
@@ -115,12 +116,22 @@ export const ControlPlaneLayers: React.FC<ControlPlaneLayersProps> = () => {
   const activeLayer = layers[activeLayerIndex] || layers[0];
 
   // Dynamic SVG Graph Line calculation
-  const startPt = wingPos
-    ? { x: wingPos.x, y: wingPos.y }
-    : {
-        x: stageRef.current ? stageRef.current.clientWidth * (isSideBySide ? 0.35 : 0.5) : 300,
-        y: stageRef.current ? stageRef.current.clientHeight * (isSideBySide ? 0.45 : 0.25) : 250,
-      };
+  // Offset projected wing beacon by canvasContainer position relative to stageRef
+  let startPt = {
+    x: stageRef.current ? stageRef.current.clientWidth * (isSideBySide ? 0.35 : 0.5) : 300,
+    y: stageRef.current ? stageRef.current.clientHeight * (isSideBySide ? 0.45 : 0.35) : 250,
+  };
+
+  if (wingPos && stageRef.current && canvasContainerRef.current) {
+    const stageRect = stageRef.current.getBoundingClientRect();
+    const canvasRect = canvasContainerRef.current.getBoundingClientRect();
+    startPt = {
+      x: canvasRect.left - stageRect.left + wingPos.x,
+      y: canvasRect.top - stageRect.top + wingPos.y,
+    };
+  } else if (wingPos) {
+    startPt = { x: wingPos.x, y: wingPos.y };
+  }
 
   const endPt = cardAnchor
     ? cardAnchor
@@ -137,7 +148,8 @@ export const ControlPlaneLayers: React.FC<ControlPlaneLayersProps> = () => {
     const midX = startPt.x + deltaX * 0.55;
     graphPath = `M ${startPt.x} ${startPt.y} L ${midX} ${startPt.y} L ${midX} ${endPt.y} L ${endPt.x} ${endPt.y}`;
   } else {
-    const midY = startPt.y + deltaY * 0.5;
+    // Mobile and Tablet: short technical stepped connector downwards into the card top
+    const midY = startPt.y + Math.max(8, deltaY * 0.5);
     graphPath = `M ${startPt.x} ${startPt.y} L ${startPt.x} ${midY} L ${endPt.x} ${midY} L ${endPt.x} ${endPt.y}`;
   }
 
@@ -147,8 +159,8 @@ export const ControlPlaneLayers: React.FC<ControlPlaneLayersProps> = () => {
       ref={outerTrackRef}
       className="relative bg-white border-b border-neutral-200 min-h-[420vh] sm:min-h-[480vh] lg:min-h-[500vh]"
     >
-      {/* Sticky Viewport pinned while scrolling through all 7 layers - Uses 100dvh for exact viewport height */}
-      <div className="sticky top-0 h-[100dvh] w-full flex flex-col justify-between overflow-hidden bg-white z-20">
+      {/* Sticky Viewport pinned while scrolling through all 7 layers - Generous breathing room below sticky navbar on all devices */}
+      <div className="sticky top-0 h-[100dvh] w-full flex flex-col justify-between overflow-hidden bg-white z-20 pt-[78px] sm:pt-[88px] lg:pt-[94px]">
         
         {/* Top Header: strictly adheres to title & subtitle from JSON */}
         <LayerHeaderBar
@@ -160,10 +172,13 @@ export const ControlPlaneLayers: React.FC<ControlPlaneLayersProps> = () => {
         {/* Unified Main Stage: 3D Canvas + SVG Graph Line + Dynamic Layer Card */}
         <div
           ref={stageRef}
-          className="relative flex-1 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col lg:flex-row items-center justify-between overflow-hidden py-1 min-h-0"
+          className="relative flex-1 w-full max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 flex flex-col lg:flex-row items-center justify-center lg:justify-between overflow-hidden py-1 min-h-0 gap-1 sm:gap-2 lg:gap-8"
         >
           {/* 1. 3D Model Stage with the 7 Wings rotating on scroll - Scaled with DVH */}
-          <div className="relative w-full lg:w-[56%] xl:w-[58%] h-[26dvh] sm:h-[30dvh] md:h-[32dvh] max-h-[220px] sm:max-h-[260px] md:max-h-[290px] lg:max-h-none lg:h-full flex items-center justify-center select-none shrink-0 lg:shrink">
+          <div
+            ref={canvasContainerRef}
+            className="relative w-full lg:w-[56%] xl:w-[58%] h-[38dvh] sm:h-[42dvh] md:h-[45dvh] min-h-[260px] sm:min-h-[300px] md:min-h-[340px] max-h-[340px] sm:max-h-[400px] md:max-h-[460px] lg:max-h-none lg:h-full flex items-center justify-center select-none shrink-0 lg:shrink"
+          >
             <Hero3DCanvasDeferred
               activeLayerIndex={activeLayerIndex}
               scrollProgress={scrollProgress}
@@ -171,7 +186,7 @@ export const ControlPlaneLayers: React.FC<ControlPlaneLayersProps> = () => {
                 setWingPos(pos);
                 updateCardAnchor();
               }}
-              className="w-full h-full min-h-[160px] sm:min-h-[190px] md:min-h-[220px] lg:min-h-[520px]"
+              className="w-full h-full min-h-[260px] sm:min-h-[300px] md:min-h-[340px] lg:min-h-[520px]"
             />
           </div>
 
@@ -212,7 +227,7 @@ export const ControlPlaneLayers: React.FC<ControlPlaneLayersProps> = () => {
             {/* Origin Hotspot on the Rotated 3D Wing */}
             <g transform={`translate(${startPt.x}, ${startPt.y})`}>
               <circle
-                r="9"
+                r="10"
                 fill="none"
                 stroke="#E5FE54"
                 strokeWidth="2"
@@ -225,17 +240,32 @@ export const ControlPlaneLayers: React.FC<ControlPlaneLayersProps> = () => {
                 stroke="#0a0a0a"
                 strokeWidth="2"
               />
-              <text
-                x="12"
-                y="-5"
-                fill="#0a0a0a"
-                fontSize="10"
-                fontFamily="monospace"
-                fontWeight="700"
-                className="select-none"
-              >
-                LAYER 0{activeLayerIndex + 1}
-              </text>
+              {/* Frosted callout pill badge for ultra-crisp legibility */}
+              <g transform="translate(10, -18)">
+                <rect
+                  x="0"
+                  y="0"
+                  width="72"
+                  height="19"
+                  rx="9.5"
+                  fill="rgba(255, 255, 255, 0.95)"
+                  stroke="#171717"
+                  strokeWidth="1"
+                  className="shadow-xs"
+                />
+                <text
+                  x="36"
+                  y="13"
+                  textAnchor="middle"
+                  fill="#0a0a0a"
+                  fontSize="9.5"
+                  fontFamily="monospace"
+                  fontWeight="700"
+                  className="select-none"
+                >
+                  LAYER 0{activeLayerIndex + 1}
+                </text>
+              </g>
             </g>
 
             {/* Terminal node entering the descriptive card */}

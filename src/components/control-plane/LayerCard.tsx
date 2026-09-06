@@ -37,7 +37,7 @@ export const LayerCard: React.FC<LayerCardProps> = ({
   return (
     <div
       ref={cardRef}
-      className="w-full lg:w-[44%] xl:w-[40%] max-w-lg lg:max-w-[450px] z-30 flex items-center justify-center shrink-0 mb-1 sm:mb-2 lg:my-auto lg:self-center px-1 sm:px-0"
+      className="w-full lg:w-[44%] xl:w-[40%] max-w-lg lg:max-w-[450px] z-30 flex items-center justify-center shrink-0 mb-0 lg:my-auto lg:self-center px-2 sm:px-0"
     >
       <AnimatePresence mode="wait">
         <motion.div
@@ -46,12 +46,12 @@ export const LayerCard: React.FC<LayerCardProps> = ({
           animate={{ opacity: 1, x: 0, y: 0 }}
           exit={{ opacity: 0, x: isSideBySide ? -10 : 0, y: isSideBySide ? 0 : -6 }}
           transition={{ duration: 0.24, ease: 'easeOut' }}
-          className="w-full bg-neutral-950 text-white rounded-2xl p-3 sm:p-4 lg:p-6 shadow-enterprise-xl border border-neutral-800 relative overflow-hidden backdrop-blur-xl max-h-[calc(100dvh-310px)] sm:max-h-[calc(100dvh-340px)] md:max-h-[calc(100dvh-360px)] lg:max-h-[calc(100dvh-130px)] flex flex-col justify-between"
+          className="w-full bg-neutral-950 text-white rounded-2xl p-2.5 sm:p-4 lg:p-6 shadow-enterprise-xl border border-neutral-800 relative overflow-hidden backdrop-blur-xl max-h-[220px] sm:max-h-[270px] md:max-h-[300px] lg:max-h-[calc(100dvh-130px)] flex flex-col justify-between"
         >
           {/* Scrollable container inside card to prevent any cutoff on small vertical displays */}
           <div className="overflow-y-auto scrollbar-thin pr-1">
             {/* Accent Header Bar */}
-            <div className="flex items-center justify-between border-b border-neutral-800/80 pb-2 mb-2">
+            <div className="flex items-center justify-between border-b border-neutral-800/80 pb-1.5 mb-1.5 sm:pb-2 sm:mb-2">
               <div className="flex items-center space-x-2">
                 <span className="w-1.5 h-3 sm:h-3.5 bg-[#E5FE54] rounded-full inline-block" />
                 <span className="text-[10px] sm:text-[11px] font-mono font-bold tracking-wider text-[#E5FE54] uppercase">
@@ -70,21 +70,21 @@ export const LayerCard: React.FC<LayerCardProps> = ({
             </h3>
 
             {/* Primary Associated Description Text strictly from JSON */}
-            <p className="mt-1.5 text-xs sm:text-sm lg:text-base text-neutral-200 font-medium leading-relaxed">
+            <p className="mt-1 sm:mt-1.5 text-xs sm:text-sm lg:text-base text-neutral-200 font-medium leading-snug sm:leading-relaxed">
               {activeLayer.description}
             </p>
 
             {/* Architectural Section Context */}
-            <p className="mt-1.5 text-[10.5px] sm:text-xs text-neutral-400 leading-normal line-clamp-2 sm:line-clamp-none">
+            <p className="mt-1 sm:mt-1.5 text-[10px] sm:text-xs text-neutral-400 leading-normal line-clamp-1 sm:line-clamp-none">
               {sectionDescription}
             </p>
 
             {/* Protocol / Architecture Tags strictly from JSON */}
-            <div className="mt-2.5 pt-2 border-t border-neutral-800/80 flex flex-wrap gap-1 sm:gap-1.5">
+            <div className="mt-1.5 sm:mt-2.5 pt-1.5 sm:pt-2 border-t border-neutral-800/80 flex flex-wrap gap-1 sm:gap-1.5">
               {activeLayer.tags.map((tag) => (
                 <span
                   key={tag}
-                  className="text-[9px] sm:text-[10px] font-mono bg-neutral-900 border border-neutral-800 text-neutral-300 px-1.5 sm:px-2 py-0.5 rounded"
+                  className="text-[8.5px] sm:text-[10px] font-mono bg-neutral-900 border border-neutral-800 text-neutral-300 px-1.5 sm:px-2 py-0.5 rounded"
                 >
                   {tag}
                 </span>
@@ -93,7 +93,7 @@ export const LayerCard: React.FC<LayerCardProps> = ({
           </div>
 
           {/* Interactive Stepper Bar (Direct Click & Touch Navigation) */}
-          <div className="mt-2.5 pt-2 border-t border-neutral-800/80 flex items-center justify-between shrink-0">
+          <div className="mt-1.5 sm:mt-2.5 pt-1.5 sm:pt-2 border-t border-neutral-800/80 flex items-center justify-between shrink-0">
             <div className="flex items-center space-x-1 sm:space-x-1.5">
               {layers.map((l, idx) => (
                 <button
