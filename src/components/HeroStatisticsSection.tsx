@@ -46,15 +46,18 @@ export const HeroStatisticsSection: React.FC<HeroStatisticsSectionProps> = ({ is
             - Mobile/Small Tablets (< md:): 3 items on top row, 2 items on second row,
               centrally aligned with equal left and right spacing.
           */}
-          <div className="flex flex-wrap justify-center md:justify-between items-start gap-y-8 gap-x-3 sm:gap-x-5 md:gap-x-3 lg:gap-6 w-full">
-            <AnimatePresence mode="wait">
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={isDeveloperMode ? 'dev' : 'ent'}
+              initial={{ opacity: 0, y: 6 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -6 }}
+              transition={{ duration: 0.2 }}
+              className="flex flex-wrap justify-center md:justify-between items-start gap-y-8 gap-x-3 sm:gap-x-5 md:gap-x-3 lg:gap-6 w-full"
+            >
               {currentContent.stats.map((stat, idx) => (
-                <motion.div
+                <div
                   key={`${isDeveloperMode ? 'dev' : 'ent'}-${idx}-${stat.value}`}
-                  initial={{ opacity: 0, y: 8 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -8 }}
-                  transition={{ duration: 0.2, delay: idx * 0.03 }}
                   className="w-[29%] sm:w-[28%] md:w-auto md:flex-1 min-w-[90px] max-w-[155px] md:max-w-none text-center md:text-left md:border-r md:border-neutral-200/50 md:last:border-r-0 md:pr-4 lg:pr-6"
                 >
                   <AnimatedStatItem
@@ -62,10 +65,10 @@ export const HeroStatisticsSection: React.FC<HeroStatisticsSectionProps> = ({ is
                     label={stat.label}
                     isInView={statsInView}
                   />
-                </motion.div>
+                </div>
               ))}
-            </AnimatePresence>
-          </div>
+            </motion.div>
+          </AnimatePresence>
         </div>
       </div>
     </section>

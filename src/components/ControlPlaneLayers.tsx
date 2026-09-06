@@ -1,24 +1,18 @@
 'use client';
 
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { motion, AnimatePresence } from 'motion/react';
-import {
-  Layers,
-  ChevronLeft,
-  ChevronRight,
-  ShieldCheck,
-  CheckCircle2,
-  Activity,
-  Cpu,
-} from 'lucide-react';
-import { Hero3DCanvas, WingPosition } from './Hero3DCanvas';
+import type { WingPosition } from './Hero3DCanvas';
+import { Hero3DCanvasDeferred } from './control-plane/Hero3DCanvasDeferred';
+import { LayerHeaderBar } from './control-plane/LayerHeaderBar';
+import { LayerFooterBar } from './control-plane/LayerFooterBar';
+import { LayerCard } from './control-plane/LayerCard';
 import { SITE_DATA } from '../data/siteContent';
 
 interface ControlPlaneLayersProps {
   onOpenDemo?: () => void;
 }
 
-export const ControlPlaneLayers: React.FC<ControlPlaneLayersProps> = ({ onOpenDemo }) => {
+export const ControlPlaneLayers: React.FC<ControlPlaneLayersProps> = () => {
   const sectionData = SITE_DATA.control_plane_layers;
   const layers = sectionData.layers;
 
@@ -157,40 +151,20 @@ export const ControlPlaneLayers: React.FC<ControlPlaneLayersProps> = ({ onOpenDe
       <div className="sticky top-0 h-[100dvh] w-full flex flex-col justify-between overflow-hidden bg-white z-20">
         
         {/* Top Header: strictly adheres to title & subtitle from JSON */}
-        <div className="w-full border-b border-neutral-100 bg-white/95 backdrop-blur-md px-4 sm:px-8 py-2 z-30 shrink-0">
-          <div className="max-w-7xl mx-auto flex items-center justify-between">
-            <div className="flex items-center space-x-3">
-              <span className="text-[10px] sm:text-[11px] font-mono font-bold tracking-wider text-neutral-400 uppercase">
-                {sectionData.title}
-              </span>
-              <span className="text-neutral-300">/</span>
-              <h2 className="text-xs sm:text-sm font-bold text-neutral-950 tracking-tight flex items-center space-x-2">
-                <Layers size={14} className="text-neutral-700" />
-                <span>{sectionData.subtitle}</span>
-              </h2>
-            </div>
-
-            <div className="flex items-center space-x-3 text-xs font-mono">
-              <div className="hidden sm:flex items-center space-x-1.5 text-neutral-500">
-                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                <span className="text-[11px]">100% IN-VPC</span>
-              </div>
-              <div className="flex items-center space-x-1.5 text-neutral-950 font-bold bg-[#E5FE54]/40 border border-[#E5FE54] px-2 sm:px-2.5 py-0.5 rounded-full text-[11px] sm:text-xs">
-                <span className="w-2 h-2 rounded-full bg-black animate-pulse" />
-                <span>LAYER 0{activeLayerIndex + 1} OF 07</span>
-              </div>
-            </div>
-          </div>
-        </div>
+        <LayerHeaderBar
+          title={sectionData.title}
+          subtitle={sectionData.subtitle}
+          activeLayerIndex={activeLayerIndex}
+        />
 
         {/* Unified Main Stage: 3D Canvas + SVG Graph Line + Dynamic Layer Card */}
         <div
           ref={stageRef}
           className="relative flex-1 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col lg:flex-row items-center justify-between overflow-hidden py-1 min-h-0"
         >
-          {/* 1. 3D Model Stage with the 7 Wings rotating on scroll - Scaled with DVH to prevent pushing card offscreen on tablets */}
+          {/* 1. 3D Model Stage with the 7 Wings rotating on scroll - Scaled with DVH */}
           <div className="relative w-full lg:w-[56%] xl:w-[58%] h-[26dvh] sm:h-[30dvh] md:h-[32dvh] max-h-[220px] sm:max-h-[260px] md:max-h-[290px] lg:max-h-none lg:h-full flex items-center justify-center select-none shrink-0 lg:shrink">
-            <Hero3DCanvas
+            <Hero3DCanvasDeferred
               activeLayerIndex={activeLayerIndex}
               scrollProgress={scrollProgress}
               onActiveWingPositionChange={(pos) => {
@@ -275,150 +249,25 @@ export const ControlPlaneLayers: React.FC<ControlPlaneLayersProps> = ({ onOpenDe
             </g>
           </svg>
 
-          {/* 3. Associated Descriptive Text Card (Guaranteed never to be cut off across any DVH) */}
-          <div
-            ref={cardRef}
-            className="w-full lg:w-[44%] xl:w-[40%] max-w-lg lg:max-w-[450px] z-30 flex items-center justify-center shrink-0 mb-1 sm:mb-2 lg:my-auto lg:self-center px-1 sm:px-0"
-          >
-            <AnimatePresence mode="wait">
-              <motion.div
-                key={activeLayer.id}
-                initial={{ opacity: 0, x: isSideBySide ? 14 : 0, y: isSideBySide ? 0 : 8 }}
-                animate={{ opacity: 1, x: 0, y: 0 }}
-                exit={{ opacity: 0, x: isSideBySide ? -10 : 0, y: isSideBySide ? 0 : -6 }}
-                transition={{ duration: 0.24, ease: 'easeOut' }}
-                className="w-full bg-neutral-950 text-white rounded-2xl p-3 sm:p-4 lg:p-6 shadow-enterprise-xl border border-neutral-800 relative overflow-hidden backdrop-blur-xl max-h-[calc(100dvh-310px)] sm:max-h-[calc(100dvh-340px)] md:max-h-[calc(100dvh-360px)] lg:max-h-[calc(100dvh-130px)] flex flex-col justify-between"
-              >
-                {/* Scrollable container inside card to prevent any cutoff on small vertical displays */}
-                <div className="overflow-y-auto scrollbar-thin pr-1">
-                  
-                  {/* Accent Header Bar */}
-                  <div className="flex items-center justify-between border-b border-neutral-800/80 pb-2 mb-2">
-                    <div className="flex items-center space-x-2">
-                      <span className="w-1.5 h-3 sm:h-3.5 bg-[#E5FE54] rounded-full inline-block" />
-                      <span className="text-[10px] sm:text-[11px] font-mono font-bold tracking-wider text-[#E5FE54] uppercase">
-                        LAYER 0{activeLayer.id} // ACTIVE
-                      </span>
-                    </div>
-
-                    <span className="text-[9.5px] sm:text-[11px] font-mono font-semibold bg-neutral-900 border border-neutral-700/80 text-neutral-300 px-2 py-0.5 rounded-full">
-                      WING 0{activeLayer.id}
-                    </span>
-                  </div>
-
-                  {/* Layer Title strictly from JSON */}
-                  <h3 className="text-sm sm:text-base md:text-lg lg:text-xl font-bold text-white tracking-tight leading-snug">
-                    {activeLayer.title}
-                  </h3>
-
-                  {/* Primary Associated Description Text strictly from JSON */}
-                  <p className="mt-1.5 text-xs sm:text-sm lg:text-base text-neutral-200 font-medium leading-relaxed">
-                    {activeLayer.description}
-                  </p>
-
-                  {/* Architectural Section Context */}
-                  <p className="mt-1.5 text-[10.5px] sm:text-xs text-neutral-400 leading-normal line-clamp-2 sm:line-clamp-none">
-                    {sectionData.description}
-                  </p>
-
-                  {/* Protocol / Architecture Tags strictly from JSON */}
-                  <div className="mt-2.5 pt-2 border-t border-neutral-800/80 flex flex-wrap gap-1 sm:gap-1.5">
-                    {activeLayer.tags.map((tag) => (
-                      <span
-                        key={tag}
-                        className="text-[9px] sm:text-[10px] font-mono bg-neutral-900 border border-neutral-800 text-neutral-300 px-1.5 sm:px-2 py-0.5 rounded"
-                      >
-                        {tag}
-                      </span>
-                    ))}
-                  </div>
-
-                </div>
-
-                {/* Interactive Stepper Bar (Direct Click & Touch Navigation) */}
-                <div className="mt-2.5 pt-2 border-t border-neutral-800/80 flex items-center justify-between shrink-0">
-                  <div className="flex items-center space-x-1 sm:space-x-1.5">
-                    {layers.map((l, idx) => (
-                      <button
-                        key={l.id}
-                        onClick={() => handleJumpToLayer(idx)}
-                        className={`h-5 sm:h-6 px-1.5 sm:px-2 text-[9px] sm:text-[10px] font-mono font-bold rounded transition-all cursor-pointer ${
-                          idx === activeLayerIndex
-                            ? 'bg-[#E5FE54] text-neutral-950 shadow-xs scale-105'
-                            : 'bg-neutral-900 text-neutral-400 hover:text-white hover:bg-neutral-800'
-                        }`}
-                        title={`Rotate to Layer ${l.id}: ${l.title}`}
-                      >
-                        0{idx + 1}
-                      </button>
-                    ))}
-                  </div>
-
-                  <div className="text-[10px] font-mono text-neutral-400 hidden sm:block">
-                    Scroll to rotate 3D model
-                  </div>
-
-                  <div className="flex items-center space-x-1.5">
-                    <button
-                      onClick={handlePrev}
-                      disabled={activeLayerIndex === 0}
-                      className="w-6 h-6 rounded bg-neutral-900 hover:bg-neutral-800 disabled:opacity-30 disabled:cursor-not-allowed text-white flex items-center justify-center transition-colors cursor-pointer"
-                      aria-label="Previous layer"
-                    >
-                      <ChevronLeft size={13} />
-                    </button>
-                    <button
-                      onClick={handleNext}
-                      disabled={activeLayerIndex === layers.length - 1}
-                      className="w-6 h-6 rounded bg-neutral-900 hover:bg-neutral-800 disabled:opacity-30 disabled:cursor-not-allowed text-white flex items-center justify-center transition-colors cursor-pointer"
-                      aria-label="Next layer"
-                    >
-                      <ChevronRight size={13} />
-                    </button>
-                  </div>
-                </div>
-
-              </motion.div>
-            </AnimatePresence>
-          </div>
+          {/* 3. Associated Descriptive Text Card (Vertically centered on desktop) */}
+          <LayerCard
+            cardRef={cardRef}
+            activeLayer={activeLayer}
+            sectionDescription={sectionData.description}
+            layers={layers}
+            activeLayerIndex={activeLayerIndex}
+            isSideBySide={isSideBySide}
+            onJumpToLayer={handleJumpToLayer}
+            onNext={handleNext}
+            onPrev={handlePrev}
+          />
         </div>
 
         {/* Minimal Bottom Bar with Real-time Scroll Indicator & Layer Breadcrumbs */}
-        <div className="w-full border-t border-neutral-100 bg-white/95 backdrop-blur-md px-3 sm:px-8 py-2 z-30 shrink-0">
-          <div className="max-w-7xl mx-auto flex items-center justify-between text-xs font-mono">
-            <div className="flex items-center space-x-1.5 text-neutral-500 text-[10px] sm:text-xs shrink-0">
-              <span className="hidden sm:inline">Scroll to reveal layers</span>
-              <span className="sm:hidden font-semibold text-neutral-700">0{activeLayerIndex + 1}</span>
-              <span className="sm:hidden text-neutral-400">/ 07</span>
-              <span className="hidden sm:inline">↓</span>
-            </div>
-
-            {/* Discrete 7-segment progress bar */}
-            <div className="flex items-center space-x-1 sm:space-x-1.5 px-1.5">
-              {layers.map((_, idx) => (
-                <div
-                  key={idx}
-                  className={`h-1.5 rounded-full transition-all duration-300 ${
-                    idx === activeLayerIndex
-                      ? 'w-4 sm:w-7 bg-neutral-950'
-                      : idx < activeLayerIndex
-                      ? 'w-1.5 sm:w-3 bg-neutral-400'
-                      : 'w-1.5 sm:w-3 bg-neutral-200'
-                  }`}
-                />
-              ))}
-            </div>
-
-            <div className="text-neutral-500 text-[10px] sm:text-[11px] shrink-0 font-medium">
-              <span className="hidden sm:inline">
-                {activeLayerIndex === 6 ? 'Scroll to continue →' : `${activeLayerIndex + 1} / 7`}
-              </span>
-              <span className="sm:hidden text-neutral-600">
-                {activeLayerIndex === 6 ? 'Continue ↓' : 'Scroll ↓'}
-              </span>
-            </div>
-          </div>
-        </div>
+        <LayerFooterBar
+          layers={layers}
+          activeLayerIndex={activeLayerIndex}
+        />
 
       </div>
     </section>

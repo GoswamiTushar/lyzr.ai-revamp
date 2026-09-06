@@ -3,6 +3,8 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { motion } from 'motion/react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { EnterpriseStoryCard } from './showcase/EnterpriseStoryCard';
+import { EnterpriseTabNav } from './showcase/EnterpriseTabNav';
 
 interface EnterpriseStory {
   id: string;
@@ -63,8 +65,7 @@ interface EnterpriseShowcaseSectionProps {
 }
 
 export const EnterpriseShowcaseSection: React.FC<EnterpriseShowcaseSectionProps> = ({ onOpenDemo }) => {
-  // Card 1 (Accenture) is active by default as shown in screenshot
-  const [activeIndex, setActiveIndex] = useState(1);
+  const [activeIndex, setActiveIndex] = useState(0);
 
   const handleNext = useCallback(() => {
     setActiveIndex((prev) => (prev + 1) % ENTERPRISE_STORIES.length);
@@ -89,7 +90,7 @@ export const EnterpriseShowcaseSection: React.FC<EnterpriseShowcaseSectionProps>
   return (
     <section
       id="enterprises-run-on-lyzr"
-      className="relative py-20 lg:py-28 bg-white border-b border-neutral-200 overflow-hidden"
+      className="section-deferred relative py-20 lg:py-28 bg-white border-b border-neutral-200 overflow-hidden"
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         
@@ -125,72 +126,14 @@ export const EnterpriseShowcaseSection: React.FC<EnterpriseShowcaseSectionProps>
         {/* DESKTOP EXPERIENCE: Expands on hover, B&W to Color    */}
         {/* ---------------------------------------------------- */}
         <div className="hidden lg:flex gap-5 items-stretch h-[480px] w-full">
-          {ENTERPRISE_STORIES.map((story, idx) => {
-            const isExpanded = activeIndex === idx;
-
-            return (
-              <div
-                key={story.id}
-                id={`enterprise-card-${story.id}`}
-                onMouseEnter={() => setActiveIndex(idx)}
-                onClick={() => setActiveIndex(idx)}
-                className={`group relative rounded-2xl overflow-hidden cursor-pointer transition-all duration-700 ease-[cubic-bezier(0.25,1,0.5,1)] ${
-                  isExpanded
-                    ? 'flex-[3.5] shadow-xl ring-1 ring-black/10'
-                    : 'flex-1 hover:flex-[1.4] shadow-sm'
-                }`}
-              >
-                {/* Background Image: B&W when collapsed, full color when expanded/hovered */}
-                <img
-                  src={story.imageUrl}
-                  alt={story.imageAlt}
-                  loading="lazy"
-                  decoding="async"
-                  className={`absolute inset-0 w-full h-full object-cover transition-all duration-700 ease-out ${
-                    isExpanded
-                      ? 'grayscale-0 brightness-[0.88] scale-100'
-                      : 'grayscale contrast-[1.08] brightness-[0.75] scale-105 group-hover:grayscale-0 group-hover:brightness-[0.82]'
-                  }`}
-                  referrerPolicy="no-referrer"
-                />
-
-                {/* Subtle dark gradient overlay for text readability */}
-                <div
-                  className={`absolute inset-0 transition-opacity duration-700 ${
-                    isExpanded
-                      ? 'bg-gradient-to-t from-black/85 via-black/40 to-black/15'
-                      : 'bg-gradient-to-t from-black/75 via-black/30 to-black/10 group-hover:from-black/80'
-                  }`}
-                />
-
-                {/* Top Logo Container */}
-                <div className="absolute top-8 left-8 z-20">
-                  <div className="flex items-center">
-                    <img
-                      src={story.logoSrc}
-                      alt={story.logoAlt}
-                      className={`h-7 sm:h-8 w-auto object-contain filter brightness-0 invert transition-all duration-500 ${
-                        isExpanded ? 'opacity-100' : 'opacity-70 group-hover:opacity-100'
-                      }`}
-                    />
-                  </div>
-                </div>
-
-                {/* Narrative Text: Only displayed when card is expanded */}
-                <div
-                  className={`absolute inset-0 p-8 sm:p-10 flex flex-col justify-end z-20 transition-all duration-500 ${
-                    isExpanded
-                      ? 'opacity-100 translate-y-0'
-                      : 'opacity-0 translate-y-4 pointer-events-none'
-                  }`}
-                >
-                  <p className="text-xl sm:text-2xl lg:text-[26px] font-normal text-white leading-snug tracking-tight max-w-xl">
-                    {story.text}
-                  </p>
-                </div>
-              </div>
-            );
-          })}
+          {ENTERPRISE_STORIES.map((story, idx) => (
+            <EnterpriseStoryCard
+              key={story.id}
+              story={story}
+              isExpanded={activeIndex === idx}
+              onSelect={() => setActiveIndex(idx)}
+            />
+          ))}
         </div>
 
         {/* ---------------------------------------------------- */}
@@ -203,6 +146,8 @@ export const EnterpriseShowcaseSection: React.FC<EnterpriseShowcaseSectionProps>
             <img
               src={currentMobileStory.imageUrl}
               alt={currentMobileStory.imageAlt}
+              width="600"
+              height="480"
               loading="lazy"
               decoding="async"
               className="absolute inset-0 w-full h-full object-cover grayscale-0 brightness-[0.82]"
@@ -217,6 +162,8 @@ export const EnterpriseShowcaseSection: React.FC<EnterpriseShowcaseSectionProps>
               <img
                 src={currentMobileStory.logoSrc}
                 alt={currentMobileStory.logoAlt}
+                width="160"
+                height="36"
                 className="h-7 sm:h-8 w-auto object-contain filter brightness-0 invert"
               />
             </div>
@@ -233,41 +180,11 @@ export const EnterpriseShowcaseSection: React.FC<EnterpriseShowcaseSectionProps>
         {/* ---------------------------------------------------- */}
         {/* BOTTOM LOGOS SELECTOR (Matching the reference ss)     */}
         {/* ---------------------------------------------------- */}
-        <div className="mt-10 lg:mt-14 flex items-center justify-center space-x-8 sm:space-x-14">
-          {ENTERPRISE_STORIES.map((story, idx) => {
-            const isSelected = activeIndex === idx;
-
-            return (
-              <button
-                key={`logo-nav-${story.id}`}
-                id={`enterprise-logo-tab-${story.id}`}
-                onClick={() => setActiveIndex(idx)}
-                onMouseEnter={() => setActiveIndex(idx)}
-                aria-label={`View ${story.company} case story`}
-                className="relative py-3 group cursor-pointer transition-all duration-300 focus:outline-hidden"
-              >
-                <img
-                  src={story.logoSrc}
-                  alt={story.logoAlt}
-                  className={`h-5 sm:h-6 w-auto object-contain transition-all duration-300 ${
-                    isSelected
-                      ? 'opacity-100 filter drop-shadow-xs scale-105'
-                      : 'opacity-40 grayscale group-hover:opacity-80 group-hover:grayscale-0'
-                  }`}
-                />
-
-                {/* Underline indicator */}
-                {isSelected && (
-                  <motion.div
-                    layoutId="activeEnterpriseLogoIndicator"
-                    className="absolute -bottom-1 left-0 right-0 h-0.5 rounded-full"
-                    style={{ backgroundColor: story.brandColor }}
-                  />
-                )}
-              </button>
-            );
-          })}
-        </div>
+        <EnterpriseTabNav
+          stories={ENTERPRISE_STORIES}
+          activeIndex={activeIndex}
+          onSelect={setActiveIndex}
+        />
 
       </div>
     </section>

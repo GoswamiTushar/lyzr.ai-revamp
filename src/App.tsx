@@ -49,9 +49,12 @@ export default function App() {
   const [showBackToTop, setShowBackToTop] = useState(false);
   const [isDeveloperMode, setIsDeveloperMode] = useState(true);
 
-  // Background idle prefetch of downstream chunks after initial paint
+  // Background idle prefetch of downstream chunks after main thread settle
   useEffect(() => {
+    let triggered = false;
     const prefetch = () => {
+      if (triggered) return;
+      triggered = true;
       import('./components/ControlPlaneLayers');
       import('./components/ProductionStatsSection');
       import('./components/EnterpriseShowcaseSection');
@@ -63,11 +66,23 @@ export default function App() {
       import('./components/Footer');
     };
 
-    if ('requestIdleCallback' in window) {
-      (window as unknown as { requestIdleCallback: (cb: () => void) => void }).requestIdleCallback(prefetch);
-    } else {
-      setTimeout(prefetch, 150);
-    }
+    // Trigger on first user interaction or when browser is truly idle after 2.5s
+    const triggerEvents = ['scroll', 'mousemove', 'touchstart'];
+    const onInteract = () => {
+      prefetch();
+      triggerEvents.forEach((ev) => window.removeEventListener(ev, onInteract));
+    };
+
+    triggerEvents.forEach((ev) =>
+      window.addEventListener(ev, onInteract, { passive: true, once: true })
+    );
+
+    const timer = setTimeout(prefetch, 2500);
+
+    return () => {
+      clearTimeout(timer);
+      triggerEvents.forEach((ev) => window.removeEventListener(ev, onInteract));
+    };
   }, []);
 
   // Initialize Lenis smooth scroll on fine pointer devices (mobile uses 100% native momentum scrolling)
@@ -189,13 +204,17 @@ export default function App() {
       <Suspense fallback={null}>
         {/* Global Footer */}
         <Footer />
-
-        {/* Book Demo Modal */}
-        <BookDemoModal
-          isOpen={demoModalOpen}
-          onClose={() => setDemoModalOpen(false)}
-        />
       </Suspense>
+
+      {/* Book Demo Modal - dynamically loaded on demand */}
+      {demoModalOpen && (
+        <Suspense fallback={null}>
+          <BookDemoModal
+            isOpen={demoModalOpen}
+            onClose={() => setDemoModalOpen(false)}
+          />
+        </Suspense>
+      )}
 
       {/* Custom Precision Cursor */}
       <CustomCursor />

@@ -5,143 +5,12 @@ import {
   TrendingUp,
   Award,
 } from 'lucide-react';
+import { SpotlightStatCard } from './stats/SpotlightStatCard';
+import { StatNumber } from './stats/StatNumber';
 
 interface ProductionStatsSectionProps {
   onOpenDemo?: () => void;
 }
-
-// ----------------------------------------------------
-// Mouse-tracking Spotlight Card in our signature UI style
-// ----------------------------------------------------
-const SpotlightStatCard: React.FC<{
-  children: React.ReactNode;
-  className?: string;
-  glowColor?: string;
-}> = ({ children, className = '', glowColor = 'rgba(229, 254, 84, 0.22)' }) => {
-  const cardRef = useRef<HTMLDivElement>(null);
-  const [mousePosition, setMousePosition] = useState({ x: -100, y: -100 });
-  const [isHovered, setIsHovered] = useState(false);
-
-  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
-    if (!cardRef.current) return;
-    const rect = cardRef.current.getBoundingClientRect();
-    setMousePosition({
-      x: e.clientX - rect.left,
-      y: e.clientY - rect.top,
-    });
-  };
-
-  return (
-    <motion.div
-      ref={cardRef}
-      onMouseMove={handleMouseMove}
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
-      whileHover={{ y: -3, scale: 1.008 }}
-      transition={{ type: 'spring', stiffness: 350, damping: 25 }}
-      className={`relative overflow-hidden rounded-2xl border transition-all duration-300 ${className}`}
-    >
-      {/* Dynamic Mouse Spotlight Glow */}
-      <div
-        className="pointer-events-none absolute -inset-px rounded-2xl opacity-0 transition-opacity duration-300"
-        style={{
-          opacity: isHovered ? 1 : 0,
-          background: `radial-gradient(380px circle at ${mousePosition.x}px ${mousePosition.y}px, ${glowColor}, transparent 70%)`,
-        }}
-        aria-hidden="true"
-      />
-      {children}
-    </motion.div>
-  );
-};
-
-// ----------------------------------------------------
-// Animated Count-Up Hook / Component that re-animates on view
-// ----------------------------------------------------
-interface StatNumberProps {
-  value: string;
-  isInView: boolean;
-}
-
-const StatNumber: React.FC<StatNumberProps> = ({ value, isInView }) => {
-  const [displayValue, setDisplayValue] = useState(value);
-
-  useEffect(() => {
-    // Parse value pattern
-    const raw = value.trim();
-    if (raw === '1M+') {
-      if (!isInView) {
-        setDisplayValue('0M+');
-        return;
-      }
-      let start: number | null = null;
-      let frameId: number;
-      const animate = (timestamp: number) => {
-        if (!start) start = timestamp;
-        const progress = Math.min((timestamp - start) / 1100, 1);
-        const current = progress < 1 ? (progress * 1).toFixed(1) : '1';
-        setDisplayValue(`${current === '1.0' || current === '1' ? '1' : current}M+`);
-        if (progress < 1) {
-          frameId = requestAnimationFrame(animate);
-        } else {
-          setDisplayValue('1M+');
-        }
-      };
-      frameId = requestAnimationFrame(animate);
-      return () => cancelAnimationFrame(frameId);
-    }
-
-    if (raw === '300%') {
-      if (!isInView) {
-        setDisplayValue('0%');
-        return;
-      }
-      let start: number | null = null;
-      let frameId: number;
-      const animate = (timestamp: number) => {
-        if (!start) start = timestamp;
-        const progress = Math.min((timestamp - start) / 1200, 1);
-        const easeOut = 1 - Math.pow(1 - progress, 3);
-        const current = Math.round(easeOut * 300);
-        setDisplayValue(`${current}%`);
-        if (progress < 1) {
-          frameId = requestAnimationFrame(animate);
-        } else {
-          setDisplayValue('300%');
-        }
-      };
-      frameId = requestAnimationFrame(animate);
-      return () => cancelAnimationFrame(frameId);
-    }
-
-    if (raw === '2026') {
-      if (!isInView) {
-        setDisplayValue('2000');
-        return;
-      }
-      let start: number | null = null;
-      let frameId: number;
-      const animate = (timestamp: number) => {
-        if (!start) start = timestamp;
-        const progress = Math.min((timestamp - start) / 1200, 1);
-        const easeOut = 1 - Math.pow(1 - progress, 3);
-        const current = 2000 + Math.round(easeOut * 26);
-        setDisplayValue(`${current}`);
-        if (progress < 1) {
-          frameId = requestAnimationFrame(animate);
-        } else {
-          setDisplayValue('2026');
-        }
-      };
-      frameId = requestAnimationFrame(animate);
-      return () => cancelAnimationFrame(frameId);
-    }
-
-    setDisplayValue(value);
-  }, [value, isInView]);
-
-  return <span>{displayValue}</span>;
-};
 
 // ----------------------------------------------------
 // Main Section: Build Agents Anywhere. Control from One Place.
@@ -169,7 +38,7 @@ export const ProductionStatsSection: React.FC<ProductionStatsSectionProps> = ({ 
     <section
       id="production-stats-section"
       ref={sectionRef}
-      className="relative py-20 lg:py-28 bg-white border-b border-neutral-200 overflow-hidden"
+      className="section-deferred relative py-20 lg:py-28 bg-white border-b border-neutral-200 overflow-hidden"
     >
       {/* Ambient background tech grid & subtle radial glow in our signature styling */}
       <div className="absolute inset-0 bg-dot-grid opacity-60 pointer-events-none" />
