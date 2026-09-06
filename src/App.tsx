@@ -39,9 +39,6 @@ const MakingHeadlinesSection = React.lazy(() =>
 const Footer = React.lazy(() =>
   import('./components/Footer').then((m) => ({ default: m.Footer }))
 );
-const CookieBanner = React.lazy(() =>
-  import('./components/CookieBanner').then((m) => ({ default: m.CookieBanner }))
-);
 const BookDemoModal = React.lazy(() =>
   import('./components/BookDemoModal').then((m) => ({ default: m.BookDemoModal }))
 );
@@ -64,7 +61,6 @@ export default function App() {
       import('./components/SecurityGovernanceSection');
       import('./components/MakingHeadlinesSection');
       import('./components/Footer');
-      import('./components/CookieBanner');
     };
 
     if ('requestIdleCallback' in window) {
@@ -193,9 +189,6 @@ export default function App() {
       <Suspense fallback={null}>
         {/* Global Footer */}
         <Footer />
-
-        {/* Cookie Consent Banner */}
-        <CookieBanner />
 
         {/* Book Demo Modal */}
         <BookDemoModal
