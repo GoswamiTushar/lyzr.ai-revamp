@@ -48,62 +48,36 @@ export const TypingHeading: React.FC<TypingHeadingProps> = ({
     return () => observer.disconnect();
   }, []);
 
-  // 2. When text or developer mode changes, reset and start typing if not first mount
+  // 2. When text or developer mode changes, type once if mode was toggled
   useEffect(() => {
     if (isFirstMount.current) {
       isFirstMount.current = false;
       setDisplayedText(text);
-      setPhase('waiting');
+      setPhase('idle');
       return;
     }
+    // Toggled mode: type out the new text smoothly
     setDisplayedText('');
-    if (isInView) {
-      setPhase('typing');
-    }
-  }, [text, isDeveloperMode, isInView]);
+    setPhase('typing');
+  }, [text, isDeveloperMode]);
 
-  // 3. Typewriter animation loop with responsive speed (ultra-fast on mobile to prevent empty space)
+  // 3. One-shot typewriter animation when toggled
   useEffect(() => {
-    if (!isInView) return;
+    if (phase !== 'typing') return;
 
     let timeoutId: NodeJS.Timeout;
 
-    if (phase === 'typing') {
-      if (displayedText.length < text.length) {
-        // High-velocity typing on mobile (8ms - 14ms per char) so headline completes in ~400ms without leaving empty space
-        // Desktop uses crisp 20ms - 28ms typing
-        const charDelay = isMobile
-          ? 9 + Math.random() * 5
-          : 22 + Math.random() * 8;
-        timeoutId = setTimeout(() => {
-          setDisplayedText(text.slice(0, displayedText.length + 1));
-        }, charDelay);
-      } else {
-        // Finished typing the heading!
-        setPhase('waiting');
-      }
-    } else if (phase === 'waiting') {
-      // Hold completed text with blinking cursor for repeatDelay (or 4.5s on mobile), then repeat
-      const holdTime = isMobile ? Math.min(repeatDelay, 4500) : repeatDelay;
+    if (displayedText.length < text.length) {
+      const charDelay = isMobile ? 12 : 20;
       timeoutId = setTimeout(() => {
-        setPhase('deleting');
-      }, holdTime);
-    } else if (phase === 'deleting') {
-      // Snappy backspacing deletion before repeating
-      if (displayedText.length > 0) {
-        timeoutId = setTimeout(() => {
-          setDisplayedText((prev) => prev.slice(0, -1));
-        }, isMobile ? 8 : 14);
-      } else {
-        // Brief pause after deleting, then start typing again immediately
-        timeoutId = setTimeout(() => {
-          setPhase('typing');
-        }, isMobile ? 180 : 300);
-      }
+        setDisplayedText(text.slice(0, displayedText.length + 1));
+      }, charDelay);
+    } else {
+      setPhase('idle');
     }
 
     return () => clearTimeout(timeoutId);
-  }, [displayedText, phase, text, isInView, repeatDelay, isMobile]);
+  }, [displayedText, phase, text, isMobile]);
 
   return (
     <h1

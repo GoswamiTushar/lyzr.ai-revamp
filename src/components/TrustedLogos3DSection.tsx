@@ -28,7 +28,7 @@ export const TrustedLogos3DSection: React.FC = () => {
   const autoSpinAnimRef = useRef<number | null>(null);
   const cylinderRef = useRef<HTMLDivElement>(null);
   const sectionRef = useRef<HTMLDivElement>(null);
-  const isVisibleRef = useRef(true);
+  const isVisibleRef = useRef(false);
 
   // Viewport intersection observer: only animate when in view
   useEffect(() => {
@@ -46,10 +46,11 @@ export const TrustedLogos3DSection: React.FC = () => {
     return () => observer.disconnect();
   }, []);
 
-  // Smooth, slow auto-rotation (~5.4 deg/sec) updating DOM transform directly (0 React re-renders)
+  // Smooth, slow auto-rotation (~5.4 deg/sec) deferred after initial paint to prevent competing with FCP/LCP
   useEffect(() => {
     let lastTime = performance.now();
     const spinSpeed = 0.009; // degrees per ms
+    let startTimer: NodeJS.Timeout;
 
     const tick = (now: number) => {
       const delta = now - lastTime;
@@ -64,9 +65,14 @@ export const TrustedLogos3DSection: React.FC = () => {
       autoSpinAnimRef.current = requestAnimationFrame(tick);
     };
 
-    autoSpinAnimRef.current = requestAnimationFrame(tick);
+    // Defer start by 800ms so initial paint & LCP have 0 competing main-thread rAF ticks
+    startTimer = setTimeout(() => {
+      lastTime = performance.now();
+      autoSpinAnimRef.current = requestAnimationFrame(tick);
+    }, 800);
 
     return () => {
+      clearTimeout(startTimer);
       if (autoSpinAnimRef.current) cancelAnimationFrame(autoSpinAnimRef.current);
     };
   }, [isPaused]);
@@ -92,15 +98,22 @@ export const TrustedLogos3DSection: React.FC = () => {
   };
 
   // Cylinder radius calibrated to provide balanced, cohesive spacing without huge gaps or clipping
-  const [cylinderRadius, setCylinderRadius] = useState(480);
+  const [cylinderRadius, setCylinderRadius] = useState<number>(() => {
+    if (typeof window !== 'undefined') {
+      const w = window.innerWidth;
+      if (w < 640) return 230;
+      if (w < 1024) return 380;
+    }
+    return 480;
+  });
+
   useEffect(() => {
     const updateRadius = () => {
       const w = window.innerWidth;
-      if (w < 640) setCylinderRadius(230); // Mobile: compact radius, tight balanced spacing between logos
-      else if (w < 1024) setCylinderRadius(380); // Tablet: clean, balanced spacing
-      else setCylinderRadius(480); // Desktop: harmonious, balanced spacing (~75-80px gap)
+      if (w < 640) setCylinderRadius(230);
+      else if (w < 1024) setCylinderRadius(380);
+      else setCylinderRadius(480);
     };
-    updateRadius();
     window.addEventListener('resize', updateRadius);
     return () => window.removeEventListener('resize', updateRadius);
   }, []);

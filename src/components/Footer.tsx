@@ -80,9 +80,9 @@ export const Footer: React.FC = () => {
               <div className="w-2.5 h-2.5 rounded-full bg-neutral-950 ring-2 ring-[#E5FE54]" />
             </div>
 
-            <h4 className="text-base sm:text-lg font-bold text-white relative z-10">
+            <p className="text-base sm:text-lg font-bold text-white relative z-10">
               {footer.newsletter.title}
-            </h4>
+            </p>
             <p className="text-xs sm:text-sm text-neutral-300 mt-1 font-normal leading-relaxed relative z-10">
               {footer.newsletter.description}
             </p>
@@ -122,9 +122,9 @@ export const Footer: React.FC = () => {
           
           {Object.entries(footer.columns).map(([colTitle, items]) => (
             <div key={colTitle} className="space-y-3">
-              <h5 className="font-mono font-semibold text-white tracking-wider uppercase text-[11px] text-[#E5FE54]">
+              <p className="font-mono font-semibold text-white tracking-wider uppercase text-[11px] text-[#E5FE54]">
                 {colTitle}
-              </h5>
+              </p>
               <ul className="space-y-2">
                 {items.map((item) => (
                   <li key={item}>

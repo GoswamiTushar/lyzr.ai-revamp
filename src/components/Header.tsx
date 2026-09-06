@@ -108,10 +108,10 @@ export const Header: React.FC<HeaderProps> = ({ onOpenDemo, onSelectSection }) =
                   className="absolute top-full left-0 w-[540px] bg-white rounded-2xl shadow-enterprise-xl border border-neutral-200/90 p-6 grid grid-cols-2 gap-6"
                 >
                   <div>
-                    <h4 className="text-[11px] font-mono font-semibold uppercase tracking-wider text-neutral-400 mb-3 flex items-center gap-1.5">
+                    <p className="text-[11px] font-mono font-semibold uppercase tracking-wider text-neutral-400 mb-3 flex items-center gap-1.5">
                       <Cpu size={13} className="text-[#0A0A0A]" />
                       <span>Products</span>
-                    </h4>
+                    </p>
                     <ul className="space-y-1.5">
                       {nav.Platform.Products.map((prod) => (
                         <li key={prod}>
@@ -137,10 +137,10 @@ export const Header: React.FC<HeaderProps> = ({ onOpenDemo, onSelectSection }) =
                     </ul>
                   </div>
                   <div>
-                    <h4 className="text-[11px] font-mono font-semibold uppercase tracking-wider text-neutral-400 mb-3 flex items-center gap-1.5">
+                    <p className="text-[11px] font-mono font-semibold uppercase tracking-wider text-neutral-400 mb-3 flex items-center gap-1.5">
                       <Terminal size={13} className="text-neutral-600" />
                       <span>Modules & OSS</span>
-                    </h4>
+                    </p>
                     <ul className="space-y-1.5">
                       {nav.Platform.Modules.slice(0, 4).map((mod) => (
                         <li key={mod}>
@@ -207,9 +207,9 @@ export const Header: React.FC<HeaderProps> = ({ onOpenDemo, onSelectSection }) =
                   className="absolute top-full left-0 w-[580px] bg-white rounded-2xl shadow-enterprise-xl border border-neutral-200/90 p-6 grid grid-cols-2 gap-6"
                 >
                   <div>
-                    <h4 className="text-[11px] font-mono font-semibold uppercase tracking-wider text-neutral-400 mb-3">
+                    <p className="text-[11px] font-mono font-semibold uppercase tracking-wider text-neutral-400 mb-3">
                       By Industry
-                    </h4>
+                    </p>
                     <div className="grid grid-cols-2 gap-1.5">
                       {nav.Solutions['By Industry'].map((ind) => (
                         <span
@@ -223,9 +223,9 @@ export const Header: React.FC<HeaderProps> = ({ onOpenDemo, onSelectSection }) =
                     </div>
                   </div>
                   <div>
-                    <h4 className="text-[11px] font-mono font-semibold uppercase tracking-wider text-neutral-400 mb-3">
+                    <p className="text-[11px] font-mono font-semibold uppercase tracking-wider text-neutral-400 mb-3">
                       By Function
-                    </h4>
+                    </p>
                     <div className="grid grid-cols-2 gap-1.5">
                       {nav.Solutions['By Function'].map((fn) => (
                         <span

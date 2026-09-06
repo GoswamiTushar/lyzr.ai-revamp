@@ -102,17 +102,25 @@ export const HeroAurora: React.FC<HeroAuroraProps> = ({ containerRef }) => {
       >
         {/* Band A: Primary Electric Lime (#E5FE54) Ribbon */}
         <motion.div
-          animate={{
-            x: [0, 40, -30, 0],
-            y: [0, -35, 25, 0],
-            scale: isHovered ? [1, 1.08, 1] : [1, 1.03, 1],
-            rotate: [0, 6, -4, 0],
-          }}
-          transition={{
-            duration: isHovered ? 12 : 18,
-            repeat: Infinity,
-            ease: 'easeInOut',
-          }}
+          animate={
+            isMobile
+              ? undefined
+              : {
+                  x: [0, 40, -30, 0],
+                  y: [0, -35, 25, 0],
+                  scale: isHovered ? [1, 1.08, 1] : [1, 1.03, 1],
+                  rotate: [0, 6, -4, 0],
+                }
+          }
+          transition={
+            isMobile
+              ? undefined
+              : {
+                  duration: isHovered ? 12 : 18,
+                  repeat: Infinity,
+                  ease: 'easeInOut',
+                }
+          }
           className="absolute top-[10%] right-[15%] w-[450px] sm:w-[680px] h-[350px] sm:h-[480px] rounded-full"
           style={{
             background:
@@ -122,18 +130,26 @@ export const HeroAurora: React.FC<HeroAuroraProps> = ({ containerRef }) => {
 
         {/* Band B: Deep Cyber Emerald / Mint Aurora Ribbon */}
         <motion.div
-          animate={{
-            x: [0, -45, 35, 0],
-            y: [0, 30, -20, 0],
-            scale: [1, 1.1, 0.95, 1],
-            rotate: [0, -8, 5, 0],
-          }}
-          transition={{
-            duration: isHovered ? 14 : 22,
-            repeat: Infinity,
-            ease: 'easeInOut',
-            delay: 1,
-          }}
+          animate={
+            isMobile
+              ? undefined
+              : {
+                  x: [0, -45, 35, 0],
+                  y: [0, 30, -20, 0],
+                  scale: [1, 1.1, 0.95, 1],
+                  rotate: [0, -8, 5, 0],
+                }
+          }
+          transition={
+            isMobile
+              ? undefined
+              : {
+                  duration: isHovered ? 14 : 22,
+                  repeat: Infinity,
+                  ease: 'easeInOut',
+                  delay: 1,
+                }
+          }
           className="absolute top-[25%] left-[20%] w-[400px] sm:w-[600px] h-[320px] sm:h-[450px] rounded-full"
           style={{
             background:
@@ -143,17 +159,25 @@ export const HeroAurora: React.FC<HeroAuroraProps> = ({ containerRef }) => {
 
         {/* Band C: Cool Atmospheric Sky Cyan Glow */}
         <motion.div
-          animate={{
-            x: [0, 25, -40, 0],
-            y: [0, -20, 35, 0],
-            scale: [1, 1.05, 1],
-          }}
-          transition={{
-            duration: 16,
-            repeat: Infinity,
-            ease: 'easeInOut',
-            delay: 2,
-          }}
+          animate={
+            isMobile
+              ? undefined
+              : {
+                  x: [0, 25, -40, 0],
+                  y: [0, -20, 35, 0],
+                  scale: [1, 1.05, 1],
+                }
+          }
+          transition={
+            isMobile
+              ? undefined
+              : {
+                  duration: 16,
+                  repeat: Infinity,
+                  ease: 'easeInOut',
+                  delay: 2,
+                }
+          }
           className="absolute top-[5%] left-[45%] w-[380px] sm:w-[520px] h-[280px] sm:h-[380px] rounded-full"
           style={{
             background:
