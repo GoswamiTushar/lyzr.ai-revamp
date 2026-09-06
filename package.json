@@ -28,5 +28,12 @@
     "@types/react-dom": "^19.0.0",
     "@types/three": "^0.185.4",
     "typescript": "^5.8.2"
-  }
+  },
+  "browserslist": [
+    "chrome >= 100",
+    "edge >= 100",
+    "firefox >= 100",
+    "safari >= 15.4",
+    "not dead"
+  ]
 }

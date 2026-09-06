@@ -128,7 +128,7 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
             </div>
 
             <div className="text-[12px] font-bold text-gray-500 tracking-[0.2em] uppercase font-mono">
-              <AnimatePresence mode="wait">
+              <AnimatePresence mode="wait" initial={false}>
                 <motion.span
                   key={isDeveloperMode ? 'dev-eye' : 'ent-eye'}
                   initial={{ opacity: 0 }}
@@ -159,7 +159,7 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
             style={{ y: subheadlineY, opacity: subheadlineOpacity }}
             className="text-[13.5px] sm:text-base md:text-lg lg:text-xl text-neutral-600 leading-[1.38] sm:leading-relaxed max-w-3xl font-normal min-h-0 sm:min-h-[2.8em]"
           >
-            <AnimatePresence mode="wait">
+            <AnimatePresence mode="wait" initial={false}>
               <motion.span
                 key={isDeveloperMode ? 'dev-sub' : 'ent-sub'}
                 initial={{ opacity: 0, y: 4 }}

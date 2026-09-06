@@ -46,7 +46,6 @@ const BookDemoModal = React.lazy(() =>
 
 export default function App() {
   const [demoModalOpen, setDemoModalOpen] = useState(false);
-  const [scrollProgress, setScrollProgress] = useState(0);
   const [showBackToTop, setShowBackToTop] = useState(false);
   const [isDeveloperMode, setIsDeveloperMode] = useState(true);
 
@@ -82,21 +81,14 @@ export default function App() {
     }
   }, []);
 
-  // Track scroll position for Back to Top & Progress Percentage
+  // Track scroll position for Back to Top (only re-renders when crossing 400px threshold)
   useEffect(() => {
     const handleScroll = () => {
-      const scrollY = window.scrollY;
-      setShowBackToTop(scrollY > 400);
-
-      const docHeight = document.documentElement.scrollHeight - window.innerHeight;
-      if (docHeight > 0) {
-        const progress = Math.min(100, Math.max(0, (scrollY / docHeight) * 100));
-        setScrollProgress(progress);
-      }
+      const shouldShow = window.scrollY > 400;
+      setShowBackToTop((prev) => (prev !== shouldShow ? shouldShow : prev));
     };
 
     window.addEventListener('scroll', handleScroll, { passive: true });
-    handleScroll(); // initial sync
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 

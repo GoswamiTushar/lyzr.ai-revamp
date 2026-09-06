@@ -46,10 +46,10 @@ export const HeroStatisticsSection: React.FC<HeroStatisticsSectionProps> = ({ is
             - Mobile/Small Tablets (< md:): 3 items on top row, 2 items on second row,
               centrally aligned with equal left and right spacing.
           */}
-          <AnimatePresence mode="wait">
+          <AnimatePresence mode="wait" initial={false}>
             <motion.div
               key={isDeveloperMode ? 'dev' : 'ent'}
-              initial={{ opacity: 0, y: 6 }}
+              initial={false}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -6 }}
               transition={{ duration: 0.2 }}

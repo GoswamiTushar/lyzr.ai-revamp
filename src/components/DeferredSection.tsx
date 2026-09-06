@@ -14,7 +14,7 @@ export const DeferredSection: React.FC<DeferredSectionProps> = ({
   children,
   minHeight = 600,
   id,
-  rootMargin = '600px 0px',
+  rootMargin = '200px 0px',
   className = '',
 }) => {
   const [shouldRender, setShouldRender] = useState(false);
@@ -32,8 +32,16 @@ export const DeferredSection: React.FC<DeferredSectionProps> = ({
     const observer = new IntersectionObserver(
       ([entry]) => {
         if (entry.isIntersecting) {
-          setShouldRender(true);
           observer.disconnect();
+          // Yield to main thread so mounting heavy downstream components never blocks user input
+          if ('requestIdleCallback' in window) {
+            (window as unknown as { requestIdleCallback: (cb: () => void, opt?: { timeout: number }) => void }).requestIdleCallback(
+              () => setShouldRender(true),
+              { timeout: 600 }
+            );
+          } else {
+            setTimeout(() => setShouldRender(true), 40);
+          }
         }
       },
       { rootMargin, threshold: 0 }

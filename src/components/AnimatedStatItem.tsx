@@ -34,14 +34,14 @@ export const AnimatedStatItem: React.FC<AnimatedStatItemProps> = ({
     const decimals = match[2].includes('.') ? match[2].split('.')[1].length : 0;
     const startZero = decimals > 0 ? (0).toFixed(decimals) : '0';
 
-    // If out of view, reset to zero so it's ready to count up fresh next time it scrolls into view
+    // If out of view, keep current display value without redundant state resets
     if (!isInView) {
-      setDisplayValue(`${prefix}${startZero}${suffix}`);
       return;
     }
 
     let startTime: number | null = null;
-    const duration = 1200; // 1.2s smooth count-up
+    let lastUpdate = 0;
+    const duration = 1100; // 1.1s smooth count-up
     let animationFrameId: number;
 
     const animateCount = (timestamp: number) => {
@@ -49,19 +49,23 @@ export const AnimatedStatItem: React.FC<AnimatedStatItemProps> = ({
       const elapsed = timestamp - startTime;
       const progress = Math.min(elapsed / duration, 1);
 
-      // Ease-out cubic for natural decelerating momentum
-      const easeOut = 1 - Math.pow(1 - progress, 3);
-      const currentNum = target * easeOut;
+      // Throttle React state updates to ~32ms (~30fps) to keep main thread completely unblocked
+      if (timestamp - lastUpdate >= 32 || progress >= 1) {
+        lastUpdate = timestamp;
+        // Ease-out cubic for natural decelerating momentum
+        const easeOut = 1 - Math.pow(1 - progress, 3);
+        const currentNum = target * easeOut;
 
-      let formattedNum: string;
-      if (decimals > 0) {
-        formattedNum = currentNum.toFixed(decimals);
-      } else {
-        const rounded = Math.round(currentNum);
-        formattedNum = hasComma ? rounded.toLocaleString('en-US') : rounded.toString();
+        let formattedNum: string;
+        if (decimals > 0) {
+          formattedNum = currentNum.toFixed(decimals);
+        } else {
+          const rounded = Math.round(currentNum);
+          formattedNum = hasComma ? rounded.toLocaleString('en-US') : rounded.toString();
+        }
+
+        setDisplayValue(`${prefix}${formattedNum}${suffix}`);
       }
-
-      setDisplayValue(`${prefix}${formattedNum}${suffix}`);
 
       if (progress < 1) {
         animationFrameId = requestAnimationFrame(animateCount);
@@ -71,8 +75,7 @@ export const AnimatedStatItem: React.FC<AnimatedStatItemProps> = ({
       }
     };
 
-    // Initialize from 0
-    setDisplayValue(`${prefix}${startZero}${suffix}`);
+    // Initialize count-up
     animationFrameId = requestAnimationFrame(animateCount);
 
     return () => cancelAnimationFrame(animationFrameId);

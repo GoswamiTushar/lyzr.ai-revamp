@@ -52,13 +52,19 @@ export const Hero3DCanvasDeferred: React.FC<Hero3DCanvasDeferredProps> = (props)
     const observer = new IntersectionObserver(
       ([entry]) => {
         if (entry.isIntersecting) {
-          setShouldLoad(true);
           observer.disconnect();
+          if ('requestIdleCallback' in window) {
+            (window as unknown as { requestIdleCallback: (cb: () => void, opt?: { timeout: number }) => void }).requestIdleCallback(
+              () => setShouldLoad(true),
+              { timeout: 800 }
+            );
+          } else {
+            setTimeout(() => setShouldLoad(true), 60);
+          }
         }
       },
       {
-        // Generous 450px threshold so 3D model is ready before user arrives
-        rootMargin: '450px 0px',
+        rootMargin: '80px 0px',
         threshold: 0,
       }
     );
