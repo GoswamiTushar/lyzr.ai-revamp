@@ -138,6 +138,8 @@ const LAYER_THEMES: LayerTheme[] = [
 export const EcosystemArchitectureSection: React.FC<EcosystemArchitectureSectionProps> = ({ onOpenDemo: _onOpenDemo }) => {
   const [activeIndex, setActiveIndex] = useState(0);
   const containerRef = useRef<HTMLDivElement>(null);
+  const progressBarRef = useRef<HTMLDivElement>(null);
+  const mobileProgressBarRef = useRef<HTMLDivElement>(null);
 
   // Scroll listener to update active layer based on scroll progress within the sticky section
   useEffect(() => {
@@ -153,6 +155,14 @@ export const EcosystemArchitectureSection: React.FC<EcosystemArchitectureSection
       // Distance scrolled past sticky lock point under navbar
       const scrolled = -(rect.top - navOffset);
       const progress = Math.max(0, Math.min(1, scrolled / totalScrollable));
+
+      // Direct GPU transform update for zero-latency, 100% analog response on every scroll pixel
+      if (progressBarRef.current) {
+        progressBarRef.current.style.transform = `scaleX(${progress})`;
+      }
+      if (mobileProgressBarRef.current) {
+        mobileProgressBarRef.current.style.transform = `scaleX(${progress})`;
+      }
 
       // Map progress across the 4 layers:
       // [0, 0.25) -> Layer 0 (Open Controller)
@@ -223,12 +233,11 @@ export const EcosystemArchitectureSection: React.FC<EcosystemArchitectureSection
       >
         {/* Pinned Sticky Section (Docks directly below navbar, never behind it) */}
         <section className="sticky top-[60px] sm:top-[68px] h-[calc(100dvh-60px)] sm:h-[calc(100dvh-68px)] w-full overflow-hidden bg-[#FCFCFB] text-neutral-900 border-b border-neutral-200 flex flex-col justify-between px-3 sm:px-6 lg:px-8 py-1.5 sm:py-2.5 lg:py-6 select-none z-20">
-          
           <div className="max-w-7xl mx-auto w-full h-full flex flex-col justify-center min-h-0">
-            
+
             {/* DESKTOP VIEW (lg+ >= 1024px) - Two-column interactive layout */}
             <div className="hidden lg:grid lg:grid-cols-12 gap-8 lg:gap-14 items-center w-full my-auto">
-              
+
               {/* Left Column: 3D Stacked Isometric Planes */}
               <div className="lg:col-span-7 flex items-center justify-center relative w-full h-full max-h-[520px] lg:max-h-[600px]">
                 <svg
@@ -350,11 +359,10 @@ export const EcosystemArchitectureSection: React.FC<EcosystemArchitectureSection
                             )}
 
                             <span
-                              className={`text-base sm:text-lg lg:text-xl transition-colors ${
-                                isActive
-                                  ? 'font-semibold text-neutral-950'
-                                  : 'font-normal text-neutral-800 group-hover:text-neutral-950'
-                              }`}
+                              className={`text-base sm:text-lg lg:text-xl transition-colors ${isActive
+                                ? 'font-semibold text-neutral-950'
+                                : 'font-normal text-neutral-800 group-hover:text-neutral-950'
+                                }`}
                             >
                               {layer.name}
                             </span>
@@ -407,10 +415,26 @@ export const EcosystemArchitectureSection: React.FC<EcosystemArchitectureSection
                   })}
                 </div>
 
-                {/* Step indicator */}
-                <div className="mt-4 flex items-center justify-between text-[11px] text-neutral-400 font-mono">
-                  <span>Scroll to step through layers</span>
-                  <span>{activeIndex + 1} / {LAYERS.length}</span>
+                {/* Step indicator with real-time Noticeable Analog Scroll Progress Bar */}
+                <div className="mt-8 pt-3.5 border-neutral-200 flex flex-col gap-2.5">
+                  <div className="flex items-center justify-between text-xs text-neutral-500 font-mono">
+                    <span className="flex items-center gap-2 text-neutral-600">
+                      <span className="w-1.5 h-1.5 rounded-full bg-neutral-900 animate-pulse" />
+                      <span>Scroll to step through layers</span>
+                    </span>
+                    <span className="font-semibold text-neutral-900 tracking-wider">
+                      0{activeIndex + 1} / 0{LAYERS.length}
+                    </span>
+                  </div>
+
+                  {/* Noticeable Analog Scroll Progress Track */}
+                  <div className="w-full h-1.5 bg-neutral-200/90 rounded-full overflow-hidden">
+                    <div
+                      ref={progressBarRef}
+                      className="h-full w-full bg-neutral-900 rounded-full origin-left will-change-transform"
+                      style={{ transform: 'scaleX(0)' }}
+                    />
+                  </div>
                 </div>
               </div>
 
@@ -418,7 +442,7 @@ export const EcosystemArchitectureSection: React.FC<EcosystemArchitectureSection
 
             {/* MOBILE & TABLET VIEW (< lg / under 1024px) - Scaled 3D blocks on top with proportional presence + compact text card below, fully visible within DVH */}
             <div className="flex lg:hidden flex-col justify-between h-full min-h-0 py-0.5 sm:py-1 gap-1.5 sm:gap-2">
-              
+
               {/* 1. 3D Layers SVG - Proportional to dvh so card below is guaranteed 100% visible */}
               <div className="flex-1 min-h-[150px] sm:min-h-[180px] md:min-h-[200px] max-h-[30dvh] sm:max-h-[34dvh] md:max-h-[36dvh] flex items-center justify-center relative w-full px-2 overflow-hidden">
                 <svg
@@ -503,7 +527,7 @@ export const EcosystemArchitectureSection: React.FC<EcosystemArchitectureSection
 
               {/* 2. Below: Content-fitted card guaranteed 100% visible on all viewports and DVH */}
               <div className="shrink-0 w-full max-w-xl mx-auto bg-white border border-[#EAE3DA] rounded-xl p-2.5 sm:p-3.5 md:p-4 shadow-xs flex flex-col gap-1.5 sm:gap-2 mb-0.5 sm:mb-1">
-                
+
                 {/* Active Layer Header with Icon & Counter */}
                 <div className="flex items-center justify-between">
                   <div className="flex items-center space-x-2">
@@ -547,9 +571,19 @@ export const EcosystemArchitectureSection: React.FC<EcosystemArchitectureSection
 
               </div>
 
-              {/* Mobile Scroll Hint */}
-              <div className="text-center text-[10px] font-mono text-neutral-400 shrink-0 pb-0.5">
-                Scroll to step through layers ↓
+              {/* Mobile Scroll Hint & Progress Bar */}
+              <div className="flex flex-col gap-1.5 text-center text-[10px] font-mono text-neutral-500 shrink-0 pb-1 px-4">
+                <div className="flex items-center justify-between">
+                  <span>Scroll to step through layers ↓</span>
+                  <span className="font-bold text-neutral-900">0{activeIndex + 1} / 04</span>
+                </div>
+                <div className="w-full h-1 bg-neutral-200 rounded-full overflow-hidden">
+                  <div
+                    ref={mobileProgressBarRef}
+                    className="h-full w-full bg-neutral-900 rounded-full origin-left will-change-transform"
+                    style={{ transform: 'scaleX(0)' }}
+                  />
+                </div>
               </div>
 
             </div>

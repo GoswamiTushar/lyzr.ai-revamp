@@ -229,26 +229,118 @@ export const COMPLIANCE_ITEMS: ComplianceItem[] = [
 
 interface ComplianceCardProps {
   item: ComplianceItem;
+  isActive?: boolean;
+  isRevealed?: boolean;
+  className?: string;
+  layout?: 'vertical' | 'horizontal';
 }
 
-export const ComplianceCard: React.FC<ComplianceCardProps> = ({ item }) => {
+export const ComplianceCard: React.FC<ComplianceCardProps> = ({
+  item,
+  isActive = false,
+  isRevealed = false,
+  className = '',
+  layout = 'vertical',
+}) => {
+  if (layout === 'horizontal') {
+    return (
+      <div
+        className={`w-full relative group rounded-2xl p-6 lg:p-7 flex items-center gap-6 lg:gap-8 transition-all duration-300 backdrop-blur-xs select-none border ${
+          isActive
+            ? 'bg-[#1c1c1c] border-[#E5FE54]/70 shadow-[0_0_35px_rgba(229,254,84,0.12)] scale-[1.012]'
+            : isRevealed
+            ? 'bg-[#161616]/95 border-white/15 hover:border-[#E5FE54]/40 hover:bg-[#1a1a1a]'
+            : 'bg-[#131313]/90 border-white/10 hover:border-[#E5FE54]/40 hover:bg-[#1a1a1a]'
+        } ${className}`}
+      >
+        {/* Left: Emblem in badge container */}
+        <div className={`w-20 h-20 lg:w-24 lg:h-24 shrink-0 rounded-2xl bg-black/50 border flex items-center justify-center p-3 relative transition-all duration-300 ${
+          isActive
+            ? 'border-[#E5FE54]/40 scale-105 shadow-[0_0_20px_rgba(229,254,84,0.15)]'
+            : 'border-white/5 group-hover:scale-105'
+        }`}>
+          <div className={`absolute inset-0 rounded-2xl blur-md transition-opacity duration-300 ${
+            isActive ? 'bg-[#E5FE54]/20 opacity-100' : 'bg-white/5 opacity-0 group-hover:opacity-100'
+          }`} />
+          <div className="w-full h-full relative z-10 flex items-center justify-center">
+            {item.renderEmblem()}
+          </div>
+        </div>
+
+        {/* Right: Content details */}
+        <div className="flex-1 min-w-0 flex flex-col justify-between">
+          <div className="w-full flex items-center justify-between text-xs font-mono mb-1.5">
+            <span className={`tracking-wider font-semibold transition-colors duration-200 ${isActive ? 'text-[#E5FE54]' : 'text-neutral-400'}`}>
+              {item.badgeCode}
+            </span>
+            <div className="flex items-center space-x-1.5">
+              <CheckCircle size={14} className={`transition-colors duration-200 ${isActive ? 'text-[#E5FE54]' : 'text-emerald-400'}`} />
+              <span className={`text-[10px] font-mono tracking-wider uppercase transition-colors duration-200 ${isActive ? 'text-[#E5FE54]' : 'text-emerald-400'}`}>
+                Verified
+              </span>
+            </div>
+          </div>
+
+          <div className="my-0.5">
+            <div className={`text-base lg:text-lg font-mono font-bold tracking-wider uppercase transition-colors duration-200 ${
+              isActive ? 'text-[#E5FE54]' : 'text-white group-hover:text-[#E5FE54]'
+            }`}>
+              {item.name}
+            </div>
+            <div className="text-xs text-neutral-400 mt-0.5 font-sans">
+              {item.scope}
+            </div>
+          </div>
+
+          {/* Details paragraph: revealed on scroll (isActive or isRevealed) or hovered */}
+          <div className="mt-2 pt-2 border-t border-white/5 w-full min-h-[40px] flex items-center">
+            <p className={`text-xs leading-relaxed font-sans transition-all duration-300 ${
+              isActive
+                ? 'opacity-100 text-neutral-100 font-normal'
+                : isRevealed
+                ? 'opacity-85 text-neutral-300'
+                : 'opacity-0 lg:group-hover:opacity-100 text-neutral-400'
+            }`}>
+              {item.details}
+            </p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Default Vertical Badge Card Layout (preserved 100% for mobile/tablet horizontal track)
   return (
-    <div className="shrink-0 w-[240px] sm:w-[265px] md:w-[285px] lg:w-auto relative group bg-[#161616]/90 border border-white/10 hover:border-[#E5FE54]/50 rounded-2xl p-3.5 sm:p-4 md:p-5 lg:p-6 flex flex-col items-center text-center justify-between transition-all duration-300 backdrop-blur-xs hover:shadow-[0_0_25px_rgba(229,254,84,0.08)] hover:bg-[#1c1c1c] h-full max-h-[50dvh] sm:max-h-[54dvh] md:max-h-[58dvh] min-h-[290px] sm:min-h-[320px] md:min-h-[350px] lg:min-h-[345px]">
+    <div
+      className={`shrink-0 relative group rounded-2xl p-3.5 sm:p-4 md:p-5 lg:p-6 flex flex-col items-center text-center justify-between transition-all duration-300 backdrop-blur-xs select-none ${
+        isActive
+          ? 'bg-[#1c1c1c] border-[#E5FE54]/70 shadow-[0_0_30px_rgba(229,254,84,0.12)] scale-[1.015]'
+          : 'bg-[#161616]/90 border-white/10 hover:border-[#E5FE54]/40 hover:bg-[#1a1a1a] hover:shadow-[0_0_20px_rgba(229,254,84,0.06)]'
+      } border ${className || 'w-[240px] sm:w-[265px] md:w-[285px] lg:w-auto h-full max-h-[50dvh] sm:max-h-[54dvh] md:max-h-[58dvh] min-h-[290px] sm:min-h-[320px] md:min-h-[350px] lg:min-h-[345px]'}`}
+    >
       {/* Top Code Badge */}
-      <div className="w-full flex items-center justify-between text-[10px] font-mono text-neutral-400 mb-1.5 sm:mb-2">
-        <span className="tracking-wider text-neutral-400">{item.badgeCode}</span>
-        <CheckCircle size={12} className="text-emerald-400 shrink-0" />
+      <div className="w-full flex items-center justify-between text-[10px] font-mono mb-1.5 sm:mb-2">
+        <span className={`tracking-wider transition-colors duration-200 ${isActive ? 'text-[#E5FE54]' : 'text-neutral-400'}`}>
+          {item.badgeCode}
+        </span>
+        <CheckCircle size={13} className={`transition-colors duration-200 ${isActive ? 'text-[#E5FE54]' : 'text-emerald-400'}`} />
       </div>
 
       {/* SVG Emblem with subtle aura */}
-      <div className="w-14 h-14 sm:w-16 sm:h-16 md:w-20 md:h-20 my-1 relative flex items-center justify-center transition-transform duration-300 group-hover:scale-105">
-        <div className="absolute inset-0 bg-white/5 rounded-full blur-md opacity-0 group-hover:opacity-100 transition-opacity" />
+      <div className={`w-14 h-14 sm:w-16 sm:h-16 md:w-20 md:h-20 my-1 relative flex items-center justify-center transition-transform duration-300 ${
+        isActive ? 'scale-110' : 'group-hover:scale-105'
+      }`}>
+        <div className={`absolute inset-0 rounded-full blur-md transition-opacity duration-300 ${
+          isActive ? 'bg-[#E5FE54]/20 opacity-100' : 'bg-white/5 opacity-0 group-hover:opacity-100'
+        }`} />
         {item.renderEmblem()}
       </div>
 
       {/* Middle Label & Scope */}
       <div className="mt-2 pt-2 border-t border-white/5 w-full">
-        <div className="text-xs sm:text-[13px] font-mono font-bold tracking-wider text-white uppercase group-hover:text-[#E5FE54] transition-colors">
+        <div className={`text-xs sm:text-[13px] font-mono font-bold tracking-wider uppercase transition-colors duration-200 ${
+          isActive ? 'text-[#E5FE54]' : 'text-white group-hover:text-[#E5FE54]'
+        }`}>
           {item.name}
         </div>
         <div className="text-[10.5px] sm:text-[11px] text-neutral-400 mt-0.5 font-sans">
@@ -256,9 +348,15 @@ export const ComplianceCard: React.FC<ComplianceCardProps> = ({ item }) => {
         </div>
       </div>
 
-      {/* Detail Info: Always visible by default on mobile & tablet; smoothly fades in on desktop with ZERO layout shift */}
+      {/* Detail Info: Always visible on mobile/tablet; on desktop reveals dynamically when card is active or hovered */}
       <div className="mt-2 pt-1.5 border-t border-white/5 w-full min-h-[44px] sm:min-h-[48px] flex items-center justify-center">
-        <p className="text-[10px] sm:text-[11px] text-neutral-300 leading-relaxed font-sans opacity-100 lg:opacity-0 lg:group-hover:opacity-100 transition-opacity duration-200">
+        <p className={`text-[10px] sm:text-[11px] leading-relaxed font-sans transition-all duration-300 ${
+          isActive
+            ? 'opacity-100 text-neutral-100'
+            : isRevealed
+            ? 'opacity-85 text-neutral-200'
+            : 'opacity-100 lg:opacity-0 lg:group-hover:opacity-100 text-neutral-300'
+        }`}>
           {item.details}
         </p>
       </div>

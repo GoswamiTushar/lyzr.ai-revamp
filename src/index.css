@@ -169,6 +169,52 @@
   animation-play-state: paused;
 }
 
+/* Multi-row Infinite Marquee Animations for Agent Use Cases (Ramp.com style) */
+@keyframes marquee-left {
+  0% {
+    transform: translateX(0%);
+  }
+  100% {
+    transform: translateX(-50%);
+  }
+}
+
+@keyframes marquee-right {
+  0% {
+    transform: translateX(-50%);
+  }
+  100% {
+    transform: translateX(0%);
+  }
+}
+
+.animate-marquee-left {
+  display: flex;
+  width: max-content;
+  animation: marquee-left 96s linear infinite;
+  will-change: transform;
+}
+
+.animate-marquee-right {
+  display: flex;
+  width: max-content;
+  animation: marquee-right 96s linear infinite;
+  will-change: transform;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .marquee-row:hover .animate-marquee-left,
+  .marquee-row:hover .animate-marquee-right,
+  .animate-marquee-left:hover,
+  .animate-marquee-right:hover {
+    animation-play-state: paused !important;
+  }
+}
+
+.marquee-paused {
+  animation-play-state: paused !important;
+}
+
 /* Caret Blinking Animation */
 @keyframes caret-blink {
   0%, 100% {
