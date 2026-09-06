@@ -9,6 +9,7 @@ import { TrustedLogos3DSection } from './components/TrustedLogos3DSection';
 import { HeroStatisticsSection } from './components/HeroStatisticsSection';
 import { CustomCursor } from './components/CustomCursor';
 import { GlobalParallaxBackground } from './components/GlobalParallaxBackground';
+import { DeferredSection } from './components/DeferredSection';
 import { ArrowUp } from 'lucide-react';
 
 // Code-split below-the-fold components for sub-second FCP & LCP
@@ -48,42 +49,6 @@ export default function App() {
   const [scrollProgress, setScrollProgress] = useState(0);
   const [showBackToTop, setShowBackToTop] = useState(false);
   const [isDeveloperMode, setIsDeveloperMode] = useState(true);
-
-  // Background idle prefetch of downstream chunks after main thread settle
-  useEffect(() => {
-    let triggered = false;
-    const prefetch = () => {
-      if (triggered) return;
-      triggered = true;
-      import('./components/ControlPlaneLayers');
-      import('./components/ProductionStatsSection');
-      import('./components/EnterpriseShowcaseSection');
-      import('./components/ProductionizationGap');
-      import('./components/EcosystemArchitectureSection');
-      import('./components/AgentUseCasesSection');
-      import('./components/SecurityGovernanceSection');
-      import('./components/MakingHeadlinesSection');
-      import('./components/Footer');
-    };
-
-    // Trigger on first user interaction or when browser is truly idle after 2.5s
-    const triggerEvents = ['scroll', 'mousemove', 'touchstart'];
-    const onInteract = () => {
-      prefetch();
-      triggerEvents.forEach((ev) => window.removeEventListener(ev, onInteract));
-    };
-
-    triggerEvents.forEach((ev) =>
-      window.addEventListener(ev, onInteract, { passive: true, once: true })
-    );
-
-    const timer = setTimeout(prefetch, 2500);
-
-    return () => {
-      clearTimeout(timer);
-      triggerEvents.forEach((ev) => window.removeEventListener(ev, onInteract));
-    };
-  }, []);
 
   // Initialize Lenis smooth scroll on fine pointer devices (mobile uses 100% native momentum scrolling)
   useEffect(() => {
@@ -174,37 +139,69 @@ export default function App() {
         {/* 3. Statistics Section (5 Dynamic Count-Up Key Metrics) */}
         <HeroStatisticsSection isDeveloperMode={isDeveloperMode} />
 
-        <Suspense fallback={null}>
-          {/* 4. Control Plane Layers (7 Layers Section) */}
-          <ControlPlaneLayers onOpenDemo={() => setDemoModalOpen(true)} />
+        {/* 4. Control Plane Layers (7 Layers Section) */}
+        <DeferredSection id="control-plane-section" minHeight={800}>
+          <Suspense fallback={null}>
+            <ControlPlaneLayers onOpenDemo={() => setDemoModalOpen(true)} />
+          </Suspense>
+        </DeferredSection>
 
-          {/* 5. Enterprise Agent Sovereignty & Production Stats: Build agents anywhere. Control them from one place. Your IP stays yours. */}
-          <ProductionStatsSection onOpenDemo={() => setDemoModalOpen(true)} />
+        {/* 5. Enterprise Agent Sovereignty & Production Stats */}
+        <DeferredSection id="production-stats-section" minHeight={600}>
+          <Suspense fallback={null}>
+            <ProductionStatsSection onOpenDemo={() => setDemoModalOpen(true)} />
+          </Suspense>
+        </DeferredSection>
 
-          {/* 5b. Enterprise Stories: The world's top enterprises run on Lyzr */}
-          <EnterpriseShowcaseSection onOpenDemo={() => setDemoModalOpen(true)} />
+        {/* 5b. Enterprise Stories */}
+        <DeferredSection id="enterprise-showcase-section" minHeight={600}>
+          <Suspense fallback={null}>
+            <EnterpriseShowcaseSection onOpenDemo={() => setDemoModalOpen(true)} />
+          </Suspense>
+        </DeferredSection>
 
-          {/* 6. The Productionization Gap (Bridge Points & Comparator) */}
-          <ProductionizationGap onOpenDemo={() => setDemoModalOpen(true)} />
+        {/* 6. The Productionization Gap */}
+        <DeferredSection id="production-gap-section" minHeight={700}>
+          <Suspense fallback={null}>
+            <ProductionizationGap onOpenDemo={() => setDemoModalOpen(true)} />
+          </Suspense>
+        </DeferredSection>
 
-          {/* 6b. Ecosystem Architecture (Interactive Scroll & Time-Driven Section) */}
-          <EcosystemArchitectureSection onOpenDemo={() => setDemoModalOpen(true)} />
+        {/* 6b. Ecosystem Architecture */}
+        <DeferredSection id="ecosystem-architecture-section" minHeight={700}>
+          <Suspense fallback={null}>
+            <EcosystemArchitectureSection onOpenDemo={() => setDemoModalOpen(true)} />
+          </Suspense>
+        </DeferredSection>
 
-          {/* 7. Agent Use Cases Rail */}
-          <AgentUseCasesSection />
+        {/* 7. Agent Use Cases Rail */}
+        <DeferredSection id="agent-use-cases-section" minHeight={500}>
+          <Suspense fallback={null}>
+            <AgentUseCasesSection />
+          </Suspense>
+        </DeferredSection>
 
-          {/* 8. Enterprise Security & Governance: Strong on offense. Serious on defense. */}
-          <SecurityGovernanceSection />
+        {/* 8. Enterprise Security & Governance */}
+        <DeferredSection id="security-governance-section" minHeight={700}>
+          <Suspense fallback={null}>
+            <SecurityGovernanceSection />
+          </Suspense>
+        </DeferredSection>
 
-          {/* 9. Making Headlines */}
-          <MakingHeadlinesSection />
-        </Suspense>
+        {/* 9. Making Headlines */}
+        <DeferredSection id="making-headlines-section" minHeight={500}>
+          <Suspense fallback={null}>
+            <MakingHeadlinesSection />
+          </Suspense>
+        </DeferredSection>
       </main>
 
-      <Suspense fallback={null}>
-        {/* Global Footer */}
-        <Footer />
-      </Suspense>
+      {/* Global Footer */}
+      <DeferredSection id="footer-section" minHeight={400}>
+        <Suspense fallback={null}>
+          <Footer />
+        </Suspense>
+      </DeferredSection>
 
       {/* Book Demo Modal - dynamically loaded on demand */}
       {demoModalOpen && (
